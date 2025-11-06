@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Cotizaciones</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <!-- Añadir fuente de Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Generador de Cotizaciones</h1>
+        
+        <!-- Mover los botones aquí, antes del cotizacionForm -->
+        <div class="button-group">
+            <button onclick="mostrarFormulario()">Generar Cotización</button>
+            <button onclick="editarCotizacion()">Editar Datos</button>
+            <button onclick="descargarPDF()">Descargar PDF</button>
+            <button onclick="exportarMarkdown()">Exportar como MD</button>
+        </div>
+        <div id="mensajes"></div>
+        <pre id="vistaPrevia"></pre>
+
+        <div id="cotizacionForm" class="form-container" style="display:none;">
+  <h2>Nueva Cotización</h2>
+  
+  <div class="form-group">
+    <label for="clienteNombre">Nombre del Cliente:</label>
+    <input type="text" id="clienteNombre" required>
+  </div>
+
+  <div class="form-group" id="productoForm">
+    <h3>Agregar Producto</h3>
+    <select id="tipoProducto" required>
+        <option value="0">Seleccione un producto...</option>
+        <option value="1">Caja de Acrílico</option>
+        <option value="2">Caja de Lona</option>
+        <option value="3">Neón</option>
+        <option value="4">Impresión Lona</option>
+        <option value="5">Impresión Vinil</option>
+        <option value="6">Letras 3D</option>
+        <option value="7">Letras Planas</option>
+        <option value="8">Banner Lona</option>
+        <option value="9">Caja Circular</option>
+        <option value="10">Otro</option>
+    </select>
+
+    <!-- Campos para medidas básicas -->
+    <div id="medidas" class="form-group" style="display:none;">
+        <label for="base">Base (cm):</label>
+        <input type="number" id="base" min="1">
+        <label for="altura">Altura (cm):</label>
+        <input type="number" id="altura" min="1">
+    </div>
+
+    <!-- Campos específicos para Neón -->
+    <div id="opcionesNeon" class="form-group opciones-especificas" style="display:none;">
+        <label for="tipoNeon">Tipo de Neón:</label>
+        <select id="tipoNeon">
+            <option value="1">Neón Normal</option>
+            <option value="2">Neón 2.0</option>
+        </select>
+    </div>
+
+    <!-- Campos específicos para Impresión Lona -->
+    <div id="opcionesLona" class="form-group opciones-especificas" style="display:none;">
+        <label for="calidadLona">Calidad de Impresión:</label>
+        <select id="calidadLona">
+            <option value="1">720</option>
+            <option value="2">Alta</option>
+            <option value="3">UV</option>
+        </select>
+    </div>
+
+    <!-- Campos específicos para Impresión Vinil -->
+    <div id="opcionesVinil" class="form-group opciones-especificas" style="display:none;">
+        <label for="calidadVinil">Calidad de Vinil:</label>
+        <select id="calidadVinil">
+            <option value="1">720</option>
+            <option value="2">Alta</option>
+            <option value="3">UV</option>
+            <option value="4">UV 3M</option>
+        </select>
+    </div>
+
+    <!-- Campos específicos para Letras 3D -->
+    <div id="opcionesLetras3D" class="form-group opciones-especificas" style="display:none;">
+        <label for="material3D">Material:</label>
+        <select id="material3D">
+            <option value="1">Acrílico con luz</option>
+            <option value="2">Aluminio con luz</option>
+            <option value="3">Acrílico sin luz</option>
+            <option value="4">Aluminio sin luz</option>
+        </select>
+        <label for="altura3D">Altura (cm):</label>
+        <input type="number" id="altura3D" min="1">
+    </div>
+
+    <!-- Campos específicos para Letras Planas -->
+    <div id="opcionesLetrasPlanas" class="form-group opciones-especificas" style="display:none;">
+        <label for="materialPlanas">Material:</label>
+        <select id="materialPlanas">
+            <option value="1">Acrílico</option>
+            <option value="2">Aluminio</option>
+        </select>
+        <label for="alturaPlanas">Altura (cm):</label>
+        <input type="number" id="alturaPlanas" min="1">
+    </div>
+
+    <!-- Campos específicos para Banner -->
+    <div id="opcionesBanner" class="form-group opciones-especificas" style="display:none;">
+        <label for="calidadBanner">Calidad:</label>
+        <select id="calidadBanner">
+            <option value="1">720</option>
+            <option value="2">Alta</option>
+        </select>
+    </div>
+
+    <!-- Campos específicos para Caja Circular -->
+    <div id="opcionesCircular" class="form-group opciones-especificas" style="display:none;">
+        <label for="areaCircular">Área total (cm²):</label>
+        <input type="number" id="areaCircular" min="1">
+    </div>
+
+    <!-- Campos para otros productos -->
+    <div id="otroProducto" class="form-group" style="display:none;">
+        <label for="descripcionOtro">Descripción:</label>
+        <input type="text" id="descripcionOtro">
+        <label for="costoOtro">Costo:</label>
+        <input type="number" id="costoOtro" min="0">
+    </div>
+
+    <button type="button" onclick="agregarProducto()" class="btn-secondary">Agregar Producto</button>
+  </div>
+
+  <div class="form-group">
+    <h3>Productos Agregados</h3>
+    <div id="listaProductos" class="productos-lista"></div>
+  </div>
+
+  <div class="form-group opciones">
+    <label>
+      <input type="checkbox" id="requiereFactura"> Requiere Factura (IVA)
+    </label>
+    <label>
+      <input type="checkbox" id="requiereInstalacion"> Requiere Instalación
+    </label>
+  </div>
+
+  <div class="form-actions">
+    <button type="button" onclick="generarCotizacionDesdeForm()" class="btn-primary">Generar Cotización</button>
+    <button type="button" onclick="cerrarFormulario()" class="btn-secondary">Cancelar</button>
+  </div>
+</div>
+
+<div id="editarForm" class="form-container" style="display:none;">
+    <h2>Editar Cotización</h2>
+    
+    <div class="form-group">
+        <label for="editarCliente">Nombre del Cliente:</label>
+        <input type="text" id="editarCliente" required>
+    </div>
+
+    <div class="form-group">
+        <h3>Productos en la Cotización</h3>
+        <div id="editarListaProductos" class="productos-lista"></div>
+    </div>
+
+    <div class="form-group">
+        <label>Especificaciones adicionales:</label>
+        <textarea id="editarEspecificaciones" rows="4" style="width: 100%; margin-top: 10px;"></textarea>
+    </div>
+
+    <div class="form-group opciones">
+        <label>
+            <input type="checkbox" id="editarFactura"> Requiere Factura (IVA)
+        </label>
+        <label>
+            <input type="checkbox" id="editarInstalacion"> Requiere Instalación
+        </label>
+    </div>
+
+    <div class="form-actions">
+        <button type="button" onclick="guardarEdicion()" class="btn-primary">Guardar Cambios</button>
+        <button type="button" onclick="cerrarEdicion()" class="btn-secondary">Cancelar</button>
+    </div>
+
+    <!-- Agregar este botón en el div editarForm, antes del div de especificaciones -->
+    <div class="form-group">
+        <button type="button" onclick="mostrarFormularioEnEdicion()" class="btn-secondary">
+            Agregar Nuevo Producto
+        </button>
+        <div id="formularioNuevoProducto" style="display:none; margin-top: 15px;">
+            <!-- Los IDs serán completamente diferentes a los del formulario principal -->
+            <h3>Agregar Nuevo Producto</h3>
+            <select id="tipoProductoEdicion" class="form-control">
+                <option value="">Seleccione un producto...</option>
+                <option value="1">Caja de Acrílico</option>
+                <option value="2">Caja de Lona</option>
+                <option value="3">Neón</option>
+                <option value="4">Impresión Lona</option>
+                <option value="5">Impresión Vinil</option>
+                <option value="6">Letras 3D</option>
+                <option value="7">Letras Planas</option>
+                <option value="8">Banner Lona</option>
+                <option value="9">Caja Circular</option>
+                <option value="10">Otro</option>
+            </select>
+
+            <div id="medidasEdicion" style="display:none;">
+                <label>Base (cm):</label>
+                <input type="number" id="baseEdicion" min="1">
+                <label>Altura (cm):</label>
+                <input type="number" id="alturaEdicion" min="1">
+            </div>
+            
+            <!-- Campos específicos para Neón -->
+            <div id="opcionesNeonEdit" class="form-group opciones-especificas" style="display:none;">
+                <label for="tipoNeonEdit">Tipo de Neón:</label>
+                <select id="tipoNeonEdit">
+                    <option value="1">Neón Normal</option>
+                    <option value="2">Neón 2.0</option>
+                </select>
+            </div>
+
+            <!-- Campos específicos para Impresión Lona -->
+            <div id="opcionesLonaEdit" class="form-group opciones-especificas" style="display:none;">
+                <label for="calidadLonaEdit">Calidad de Impresión:</label>
+                <select id="calidadLonaEdit">
+                    <option value="1">720</option>
+                    <option value="2">Alta</option>
+                    <option value="3">UV</option>
+                </select>
+            </div>
+
+            <!-- Campos específicos para Impresión Vinil -->
+            <div id="opcionesVinilEdit" class="form-group opciones-especificas" style="display:none;">
+                <label for="calidadVinilEdit">Calidad de Vinil:</label>
+                <select id="calidadVinilEdit">
+                    <option value="1">720</option>
+                    <option value="2">Alta</option>
+                    <option value="3">UV</option>
+                    <option value="4">UV 3M</option>
+                </select>
+            </div>
+
+            <!-- Campos específicos para Letras 3D -->
+            <div id="opcionesLetras3DEdit" class="form-group opciones-especificas" style="display:none;">
+                <label for="material3DEdit">Material:</label>
+                <select id="material3DEdit">
+                    <option value="1">Acrílico con luz</option>
+                    <option value="2">Aluminio con luz</option>
+                    <option value="3">Acrílico sin luz</option>
+                    <option value="4">Aluminio sin luz</option>
+                </select>
+                <label for="altura3DEdit">Altura (cm):</label>
+                <input type="number" id="altura3DEdit" min="1">
+            </div>
+
+            <!-- Campos específicos para Letras Planas -->
+            <div id="opcionesLetrasPlanasEdit" class="form-group opciones-especificas" style="display:none;">
+                <label for="materialPlanasEdit">Material:</label>
+                <select id="materialPlanasEdit">
+                    <option value="1">Acrílico</option>
+                    <option value="2">Aluminio</option>
+                </select>
+                <label for="alturaPlanasEdit">Altura (cm):</label>
+                <input type="number" id="alturaPlanasEdit" min="1">
+            </div>
+
+            <!-- Campos específicos para Banner -->
+            <div id="opcionesBannerEdit" class="form-group opciones-especificas" style="display:none;">
+                <label for="calidadBannerEdit">Calidad:</label>
+                <select id="calidadBannerEdit">
+                    <option value="1">720</option>
+                    <option value="2">Alta</option>
+                </select>
+            </div>
+
+            <!-- Campos específicos para Caja Circular -->
+            <div id="opcionesCircularEdit" class="form-group opciones-especificas" style="display:none;">
+                <label for="areaCircularEdit">Área total (cm²):</label>
+                <input type="number" id="areaCircularEdit" min="1">
+            </div>
+
+            <!-- Campos para otros productos -->
+            <div id="otroProductoEdit" class="form-group" style="display:none;">
+                <label for="descripcionOtroEdit">Descripción:</label>
+                <input type="text" id="descripcionOtroEdit">
+                <label for="costoOtroEdit">Costo:</label>
+                <input type="number" id="costoOtroEdit" min="0">
+            </div>
+
+            <button type="button" onclick="agregarProductoEnEdicion()" class="btn-secondary">
+                Agregar Producto
+            </button>
+        </div>
+    </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
