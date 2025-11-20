@@ -166,11 +166,21 @@ class CotizacionApp {
 
     // ACTUALIZAR - Método para agregar producto
     agregarProducto() {
-        const tipoProducto = document.getElementById('tipoProducto').value;
+        // Verificar si es categoría neón (caso especial)
+        const categoria = document.getElementById('categoriaProducto').value;
+        let tipoProducto;
         
-        if (!tipoProducto || tipoProducto === '') {
-            alert("Seleccione un tipo de producto");
-            return;
+        if (categoria === 'neon') {
+            // Para neón, usamos el tipo '3' directamente
+            tipoProducto = '3';
+        } else {
+            // Para otras categorías, obtenemos el valor del select de subcategorías
+            tipoProducto = document.getElementById('tipoProducto').value;
+            
+            if (!tipoProducto || tipoProducto === '') {
+                alert("Seleccione un tipo de producto");
+                return;
+            }
         }
 
         const producto = this.productManager.crearProducto(tipoProducto);
@@ -344,10 +354,21 @@ class CotizacionApp {
 
     // ACTUALIZAR - Método para agregar producto en edición
     agregarProductoEnEdicion() {
-        const tipo = document.getElementById('tipoProductoEdicion').value;
-        if (!tipo) {
-            alert("Seleccione un tipo de producto");
-            return;
+        // Verificar si es categoría neón (caso especial)
+        const categoria = document.getElementById('categoriaProductoEdicion').value;
+        let tipo;
+        
+        if (categoria === 'neon') {
+            // Para neón, usamos el tipo '3' directamente
+            tipo = '3';
+        } else {
+            // Para otras categorías, obtenemos el valor del select de subcategorías
+            tipo = document.getElementById('tipoProductoEdicion').value;
+            
+            if (!tipo) {
+                alert("Seleccione un tipo de producto");
+                return;
+            }
         }
 
         const producto = this.productManager.crearProducto(tipo, 'Edicion');

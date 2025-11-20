@@ -27,7 +27,7 @@ export class CategoryManager {
     }
 
     // Actualizar subcategorías según la categoría seleccionada
-    actualizarSubcategorias(categoria, esEdicion = false) {
+    actualizarSubcategorias(categoria, esEdicion = false, formManager = null) {
         const selectTipo = document.getElementById(esEdicion ? 'tipoProductoEdicion' : 'tipoProducto');
         const divSubcategorias = document.getElementById(esEdicion ? 'subcategoriasEdicion' : 'subcategorias');
         
@@ -37,7 +37,22 @@ export class CategoryManager {
             return;
         }
 
-        // Mostrar div de subcategorías
+        // Caso especial para neón: mostrar directamente las opciones específicas
+        if (categoria === 'neon') {
+            divSubcategorias.style.display = 'none';
+            if (formManager) {
+                formManager.ocultarTodosLosCampos(esEdicion);
+                // Mostrar medidas básicas para neón
+                const medidas = document.getElementById(esEdicion ? 'medidasEdicion' : 'medidas');
+                if (medidas) medidas.style.display = 'block';
+                // Mostrar directamente las opciones de neón
+                const opcionesNeon = document.getElementById(esEdicion ? 'opcionesNeonEdit' : 'opcionesNeon');
+                if (opcionesNeon) opcionesNeon.style.display = 'block';
+            }
+            return;
+        }
+
+        // Para el resto de categorías, mostrar div de subcategorías
         divSubcategorias.style.display = 'block';
 
         // Limpiar y llenar opciones
@@ -59,9 +74,11 @@ export class CategoryManager {
         const categoriaSelect = document.getElementById('categoriaProducto');
         if (categoriaSelect) {
             categoriaSelect.addEventListener('change', (e) => {
-                this.actualizarSubcategorias(e.target.value, false);
-                // Ocultar campos específicos al cambiar categoría
-                formManager.ocultarTodosLosCampos(false);
+                this.actualizarSubcategorias(e.target.value, false, formManager);
+                // Solo ocultar campos si no es neón (ya que neón los muestra directamente)
+                if (e.target.value !== 'neon') {
+                    formManager.ocultarTodosLosCampos(false);
+                }
             });
         }
 
@@ -69,9 +86,11 @@ export class CategoryManager {
         const categoriaSelectEdicion = document.getElementById('categoriaProductoEdicion');
         if (categoriaSelectEdicion) {
             categoriaSelectEdicion.addEventListener('change', (e) => {
-                this.actualizarSubcategorias(e.target.value, true);
-                // Ocultar campos específicos al cambiar categoría
-                formManager.ocultarTodosLosCampos(true);
+                this.actualizarSubcategorias(e.target.value, true, formManager);
+                // Solo ocultar campos si no es neón (ya que neón los muestra directamente)
+                if (e.target.value !== 'neon') {
+                    formManager.ocultarTodosLosCampos(true);
+                }
             });
         }
 
