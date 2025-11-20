@@ -151,6 +151,9 @@ class CotizacionApp {
         this.productManager.productos = [];
         this.productManager.actualizarListaHTML();
         this.state.cotizacion = null;
+        
+        // Limpiar vista previa cuando se resetea el formulario
+        document.getElementById('vistaPrevia').textContent = '';
     }
 
     // Cerrar formulario principal
