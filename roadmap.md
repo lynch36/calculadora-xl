@@ -350,9 +350,9 @@ npm init playwright@latest
 
 | Prioridad | Issue | Descripción | Tiempo Est. | Estado | Deadline |
 |-----------|-------|-------------|-------------|--------|-----------|
-| 🔴 **1** | Editor no agrega productos | Bug crítico: botón agregar en modo edición no funciona | 2-3 horas | 🔴 **URGENTE** | 19 Nov 2025 |
-| 🟡 **2** | Reset timing formulario | Reset se ejecuta tarde, no después del prompt confirm | 30 min | 📋 Pendiente | 20 Nov 2025 |
-| 🟠 **3** | Redundancia neón rendering | Triple rendering: "Categoría" → "Tipo" → "Tipo Neón" | 1-2 horas | 📋 Pendiente | 25 Nov 2025 |
+| ✅ **1** | Editor no agrega productos | Bug crítico: botón agregar en modo edición no funciona | 2-3 horas | ✅ **RESUELTO** | 19 Nov 2025 |
+| ✅ **2** | Reset timing formulario | Reset se ejecuta tarde, no después del prompt confirm | 30 min | ✅ **RESUELTO** | 20 Nov 2025 |
+| ✅ **3** | Redundancia neón rendering | Triple rendering: "Categoría" → "Tipo" → "Tipo Neón" | 1-2 horas | ✅ **RESUELTO** | 25 Nov 2025 |
 
 ### **🔗 INTEGRACIÓN (Mediana prioridad - Nuevas features)**
 
@@ -360,6 +360,13 @@ npm init playwright@latest
 |---------|-------------|-------------|--------|
 | **Process Manager** | Tracking: Cotización → Venta → Producción → Instalación | 🟡 Media | 💭 Diseño |
 | **IA Letras 3D** | Cotización automática desde plano/imagen | 🔴 Alta | 🔍 Research |
+| **Modal en vez de alerts** | Reemplazar alert() nativo por modales personalizados | 🟢 Baja | 📋 Pendiente |
+| **Estructurar cálculo viáticos** | Sistematizar costos de transporte e instalación | 🟡 Media | 📋 Pendiente |
+| **Export PDF membretado** | PDF con logo y formato profesional de empresa | 🟡 Media | 📋 Pendiente |
+| **Producto Bastidores** | Cálculo individual y combinado con letras | 🟠 Media-Alta | 📋 Pendiente |
+| **Producto Toldos** | Estructura de costos y medidas para toldos | 🟡 Media | 📋 Pendiente |
+| **Señaliticas y letras caladas** | Nuevo tipo de producto con cálculo específico | 🟡 Media | 📋 Pendiente |
+| **Corregir cajas de luz/circulares** | Fix en algoritmo de cálculo de cajas existentes | 🟢 Baja | 📋 Pendiente |
 
 ### **📝 TAREAS DE DOCUMENTACIÓN**
 
