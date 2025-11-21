@@ -99,6 +99,7 @@ export class CategoryManager {
         if (tipoProducto) {
             tipoProducto.addEventListener('change', (e) => {
                 if (e.target.value) {
+                    console.log(e)
                     formManager.mostrarCamposEspecificos(e.target.value, false);
                 }
             });

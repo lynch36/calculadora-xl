@@ -134,13 +134,16 @@ class CotizacionApp {
 
     // Mostrar formulario principal
     mostrarFormulario() {
+        // Validar si hay cotización existente
         if (this.state.cotizacion) {
-            if (confirm('¿Estás seguro de que deseas crear una nueva cotización? Los datos no guardados se perderán.')) {
-                this.resetearFormulario();
+            const confirmar = confirm('¿Estás seguro de que deseas crear una nueva cotización? Los datos no guardados se perderán.');
+            if (!confirmar) {
+                return; // Usuario canceló, no hacer nada
             }
-        } else {
-            this.resetearFormulario();
         }
+        
+        // En ambos casos, resetear el formulario
+        this.resetearFormulario();
     }
 
     resetearFormulario() {
