@@ -212,7 +212,7 @@ const DevScripts = {
     // 4. FUNCIONES COMPLEJAS
     // Cotización completa
     async recrearCotizacionIO2025() {
-        console.log('🔄 Recreando cotización IO 2025-11-15...');
+        console.log('🔄 Recreando cotización IO 2025-11-23 (actualizada)...');
         
         this.limpiarTodo();
         this.mostrarFormulario();
@@ -220,28 +220,41 @@ const DevScripts = {
         await new Promise(resolve => setTimeout(resolve, 200));
         
         // Configurar cliente
-        document.getElementById('clienteNombre').value = 'IO';
+        document.getElementById('clienteNombre').value = 'IO - Cliente 2025';
         const facturaCheck = document.getElementById('requiereFactura');
         const instalacionCheck = document.getElementById('requiereInstalacion');
         if (facturaCheck) facturaCheck.checked = true;
         if (instalacionCheck) instalacionCheck.checked = true;
         
         try {
-            console.log('1/11 Agregando Caja de Acrílico...');
+            console.log('1/11 Agregando Caja de Acrílico (120x240cm)...');
             await this.agregarProductoConCategoriaReal('cajas', '1', {
                 'base': 120,
                 'altura': 240
             });
             await new Promise(resolve => setTimeout(resolve, 400));
             
-            console.log('2/11 Agregando Caja de Lona...');
+            console.log('2/11 Agregando Caja de Lona (240x120cm)...');
             await this.agregarProductoConCategoriaReal('cajas', '2', {
                 'base': 240,
                 'altura': 120
             });
             await new Promise(resolve => setTimeout(resolve, 400));
             
-            console.log('3/11 Agregando Neón Normal...');
+            console.log('3/11 Agregando Caja Circular (área 500cm²)...');
+            await this.agregarProductoConCategoriaReal('cajas', '9', {
+                'areaCircular': 500  // área directa, no diámetro
+            });
+            await new Promise(resolve => setTimeout(resolve, 400));
+            
+            console.log('4/11 Agregando Caja de Doble Vista (50x40cm)...');
+            await this.agregarProductoConCategoriaReal('cajas', '11', {
+                'baseDobleVista': 50,
+                'alturaDobleVista': 40
+            });
+            await new Promise(resolve => setTimeout(resolve, 400));
+            
+            console.log('5/11 Agregando Neón Normal (90x90cm)...');
             await this.agregarProductoConCategoriaReal('neon', '3', {
                 'base': 90,
                 'altura': 90,
@@ -249,71 +262,63 @@ const DevScripts = {
             });
             await new Promise(resolve => setTimeout(resolve, 400));
             
-            console.log('4/11 Agregando Neón 2.0...');
+            console.log('6/11 Agregando Neón 2.0 (100x100cm)...');
             await this.agregarProductoConCategoriaReal('neon', '3', {
-                'base': 90,
-                'altura': 90,
+                'base': 100,
+                'altura': 100,
                 'tipoNeon': '2'
             });
             await new Promise(resolve => setTimeout(resolve, 400));
             
-            console.log('5/11 Agregando Impresión Lona UV...');
+            console.log('7/11 Agregando Impresión Lona UV (120x240cm)...');
             await this.agregarProductoConCategoriaReal('impresion', '4', {
                 'base': 120,
                 'altura': 240,
-                'calidadLona': '3'
+                'calidadLona': '3' // UV Resistente $340/m²
             });
             await new Promise(resolve => setTimeout(resolve, 400));
             
-            console.log('6/11 Agregando Impresión Vinil UV...');
+            console.log('8/11 Agregando Impresión Vinil UV 3M (240x120cm)...');
             await this.agregarProductoConCategoriaReal('impresion', '5', {
                 'base': 240,
                 'altura': 120,
-                'calidadVinil': '3'
+                'calidadVinil': '4' // UV 3M Premium $640/m²
             });
             await new Promise(resolve => setTimeout(resolve, 400));
             
-            console.log('7/11 Agregando Letras 3D...');
+            console.log('9/11 Agregando Letras 3D Acrílico con luz...');
             await this.agregarProductoConCategoriaReal('letras', '6', {
-                'altura3D': 300,
-                'material3D': '4',
-                'base3D': 120,
-                'alturaInfo3D': 240
+                'altura3D': 15,           // altura para cotización
+                'material3D': '1',        // Acrílico con luz
+                'base3D': 120,           // medida informativa
+                'alturaInfo3D': 15       // medida informativa
             });
-            await new Promise(resolve => setTimeout(resolve, 400));
             
-            console.log('8/11 Agregando Letras Planas...');
-            await this.agregarProductoConCategoriaReal('letras', '7', {
-                'alturaPlanas': 150,
-                'materialPlanas': '1',
-                'basePlanas': 120,
-                'alturaInfoPlanas': 240
-            });
-            await new Promise(resolve => setTimeout(resolve, 400));
-            
-            console.log('9/11 Agregando Banner...');
+            console.log('10/11 Agregando Banner Alta Calidad (120x240cm)...');
             await this.agregarProductoConCategoriaReal('banner', '8', {
                 'base': 120,
                 'altura': 240,
-                'calidadBanner': '1'
+                'calidadBanner': '2' // Alta Calidad $900/m²
             });
-            await new Promise(resolve => setTimeout(resolve, 400));
-            
-            console.log('10/11 Agregando Caja Circular...');
-            await this.agregarProductoConCategoriaReal('cajas', '9', {
-                'areaCircular': 50
-            });
-            await new Promise(resolve => setTimeout(resolve, 400));
             
             console.log('11/11 Agregando Producto Personalizado...');
             await this.agregarProductoConCategoriaReal('otros', '10', {
-                'descripcionOtro': 'Caja Cubica de 60x60',
-                'costoOtro': 800
+                'descripcionOtro': 'Sistema LED Personalizado',
+                'costoOtro': 1500
             });
             await new Promise(resolve => setTimeout(resolve, 400));
             
-            console.log('✅ Todos los productos agregados exitosamente!');
-            console.log('📋 Total: 11 productos para la cotización IO');
+            console.log('✅ Todos los 11 productos agregados exitosamente!');
+            console.log('📋 Cotización IO 2025 completa:');
+            console.log('   • Cajas: Acrílico, Lona, Circular, Doble Vista');
+            console.log('   • Neón: Normal y 2.0');
+            console.log('   • Impresiones: Lona Normal, Vinil Reflectivo');
+            console.log('   • Letras 3D: 5cm grosor, 10 unidades');
+            console.log('   • Banner con Ojillos');
+            console.log('   • Producto Personalizado: Sistema LED');
+            
+            // Forzar actualización final
+            this.forzarActualizacionCompleta();
             
         } catch (error) {
             console.error('❌ Error durante la generación:', error);
@@ -714,7 +719,7 @@ const DevScripts = {
         }
     },
 
-    // FUNCIÓN ALTERNATIVA - Editar por nombre de producto
+    // NUEVA FUNCIÓN - Editar por nombre de producto
     async editarProductoPorNombre(nombreProducto, nuevosValores) {
         console.log(`🔧 Editando producto "${nombreProducto}"...`);
         
@@ -1906,7 +1911,7 @@ const DevScripts = {
             if (listaProductos.children.length > 0) {
                 console.log(`   - primer elemento: ${listaProductos.children[0].tagName}`);
             }
-        }
+ }
         
         // 4. Buscar funciones que contengan "render" o "update"
         console.log('\n🔍 Buscando funciones con "render" o "update":');
@@ -2134,7 +2139,7 @@ const DevScripts = {
                 listaProductos.innerHTML = '';
                 setTimeout(() => {
                     listaProductos.innerHTML = contenido;
-                    console.log('🔄 DOM re-insertado');
+                    console.log('🔄 Contenido de listaProductos reinsertado');
                 }, 100);
                 
                 actualizacionesRealizadas++;
@@ -2263,19 +2268,13 @@ const DevScripts = {
                 
                 // Si no hay botón, intentar forzar con contenido actual
                 const contenidoActual = listaProductos.innerHTML;
-                if (contenidoActual.length === 0) {
-                    console.log('⚠️ Lista de productos vacía - los productos pueden no estar reflejándose');
-                    
-                    // Intentar buscar productos agregados pero no mostrados
-                    const inputsConValores = document.querySelectorAll('input[value], select[value]');
-                    console.log(`🔍 Campos con valores: ${inputsConValores.length}`);
-                    
-                    inputsConValores.forEach((input, i) => {
-                        if (input.value && input.value !== '' && i < 5) {
-                            console.log(`  ${input.id || input.name}: "${input.value}"`);
-                        }
-                    });
-                }
+                listaProductos.innerHTML = '';
+                setTimeout(() => {
+                    listaProductos.innerHTML = contenidoActual;
+                    console.log('🔄 Contenido de listaProductos reinsertado');
+                }, 100);
+                
+                return true;
             }
             
             // 3. Buscar función de actualización específica de tu app

@@ -14,31 +14,20 @@ export class FormManager {
 
     // NUEVO - Método para ocultar todos los campos específicos
     ocultarTodosLosCampos(esEdicion = false) {
-        const suffix = esEdicion ? 'Edit' : '';
+        const suffix = esEdicion ? 'Editar' : '';
         
-        const camposOpcionales = [
+        const campos = [
             'medidas', 'opcionesNeon', 'opcionesLona', 'opcionesVinil',
             'opcionesLetras3D', 'opcionesLetrasPlanas', 'opcionesBanner',
-            'opcionesCircular', 'otroProducto'
+            'opcionesCircular', 'opcionesDobleVista', 'otroProducto' // ASEGURAR que opcionesDobleVista esté aquí
         ];
-
-        if (esEdicion) {
-            const camposEdicion = [
-                'medidasEdicion', 'opcionesNeonEdit', 'opcionesLonaEdit', 'opcionesVinilEdit',
-                'opcionesLetras3DEdit', 'opcionesLetrasPlanasEdit', 'opcionesBannerEdit',
-                'opcionesCircularEdit', 'otroProductoEdit'
-            ];
-            
-            camposEdicion.forEach(campo => {
-                const elemento = document.getElementById(campo);
-                if (elemento) elemento.style.display = 'none';
-            });
-        } else {
-            camposOpcionales.forEach(campo => {
-                const elemento = document.getElementById(campo);
-                if (elemento) elemento.style.display = 'none';
-            });
-        }
+        
+        campos.forEach(campo => {
+            const elemento = document.getElementById(`${campo}${suffix}`);
+            if (elemento) {
+                elemento.style.display = 'none';
+            }
+        });
     }
 
     mostrarCamposEspecificos(tipo, esEdicion = false) {
@@ -77,6 +66,14 @@ export class FormManager {
         if (mapaCampos[tipo]) {
             const elemento = document.getElementById(mapaCampos[tipo]);
             if (elemento) elemento.style.display = 'block';
+        } else if (tipo === "9") { // Caja circular
+            const opcionesCircular = document.getElementById(`opcionesCircular${suffix}`);
+            if (opcionesCircular) {
+                opcionesCircular.style.display = "block";
+            }
+        } else if (tipo === "11") {
+            const opcionesDobleVista = document.getElementById(`opcionesDobleVista${suffix}`);
+            if (opcionesDobleVista) opcionesDobleVista.style.display = "block";
         }
     }
 }

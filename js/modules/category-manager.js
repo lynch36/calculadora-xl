@@ -4,7 +4,8 @@ export class CategoryManager {
             cajas: [
                 { value: '1', text: 'Caja de Acrílico' },
                 { value: '2', text: 'Caja de Lona' },
-                { value: '9', text: 'Caja Circular' }
+                { value: '9', text: 'Caja Circular' },
+                { value: '11', text: 'Caja de Doble Vista' } // AGREGAR esta línea
             ],
             neon: [
                 { value: '3', text: 'Neón' }

@@ -56,106 +56,138 @@
     </div>
 
     <!-- Campos para medidas básicas -->
-    <div id="medidas" class="form-group" style="display:none;">
+    <div id="medidas" class="form-group opciones-especificas" style="display:none;">
         <label for="base">Base (cm):</label>
-        <input type="number" id="base" min="1">
+        <input type="number" id="base" placeholder="Ingrese la base en centímetros">
+        <small class="help-text">Ancho de la caja en centímetros</small>
+        
         <label for="altura">Altura (cm):</label>
-        <input type="number" id="altura" min="1">
+        <input type="number" id="altura" placeholder="Ingrese la altura en centímetros">
+        <small class="help-text">Alto de la caja en centímetros</small>
     </div>
 
     <!-- Campos específicos para Neón -->
     <div id="opcionesNeon" class="form-group opciones-especificas" style="display:none;">
         <label for="tipoNeon">Tipo de Neón:</label>
         <select id="tipoNeon">
+            <option value="">Seleccione tipo...</option>
             <option value="1">Neón Normal</option>
             <option value="2">Neón 2.0</option>
         </select>
+        <small class="help-text">Normal: $18/cm² | 2.0: $25/cm²</small>
     </div>
 
-    <!-- Campos específicos para Impresión Lona -->
+    <!-- Opciones para Lona - CAMPOS ORIGINALES -->
     <div id="opcionesLona" class="form-group opciones-especificas" style="display:none;">
-        <label for="calidadLona">Calidad de Impresión:</label>
-        <select id="calidadLona">
-            <option value="1">720</option>
-            <option value="2">Alta</option>
-            <option value="3">UV</option>
-        </select>
-    </div>
+    <label for="calidadLona">Calidad de Lona:</label>
+    <select id="calidadLona">
+        <option value="">Seleccione calidad...</option>
+        <option value="1">720 DPI ($110/m²)</option>
+        <option value="2">Alta Calidad ($250/m²)</option>
+        <option value="3">UV Resistente ($340/m²)</option>
+    </select>
+    <small class="help-text">Calidad 720: $110/m² | Alta: $250/m² | UV: $340/m²</small>
+</div>
 
-    <!-- Campos específicos para Impresión Vinil -->
+    <!-- Opciones para Vinil - CAMPOS ORIGINALES -->
     <div id="opcionesVinil" class="form-group opciones-especificas" style="display:none;">
-        <label for="calidadVinil">Calidad de Vinil:</label>
-        <select id="calidadVinil">
-            <option value="1">720</option>
-            <option value="2">Alta</option>
-            <option value="3">UV</option>
-            <option value="4">UV 3M</option>
-        </select>
-    </div>
+    <label for="calidadVinil">Calidad de Vinil:</label>
+    <select id="calidadVinil">
+        <option value="">Seleccione calidad...</option>
+        <option value="1">720 DPI ($224/m²)</option>
+        <option value="2">Alta Calidad ($340/m²)</option>
+        <option value="3">UV Resistente ($460/m²)</option>
+        <option value="4">UV 3M Premium ($640/m²)</option>
+    </select>
+    <small class="help-text">720: $224/m² | Alta: $340/m² | UV: $460/m² | UV 3M: $640/m²</small>
+</div>
 
     <!-- Campos específicos para Letras 3D -->
     <div id="opcionesLetras3D" class="form-group opciones-especificas" style="display:none;">
-        <label for="material3D">Material:</label>
-        <select id="material3D" required>
-            <option value="">Seleccione material</option>
-            <option value="1">Acrílico con luz</option>
-            <option value="2">Aluminio con luz</option>
-            <option value="3">Acrílico sin luz</option>
-            <option value="4">Aluminio sin luz</option>
-        </select>
         <label for="altura3D">Altura para cotización (cm):</label>
-        <input type="number" id="altura3D" min="1" required>
+        <input type="number" id="altura3D" placeholder="Altura usada en el cálculo">
+        <small class="help-text">Esta altura se usa para calcular el precio</small>
         
-        <!-- CAMPOS AHORA OBLIGATORIOS -->
-        <div class="campos-informativos" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd;">
-            <label for="base3D">Base (cm): *</label>
-            <input type="number" id="base3D" min="1" required>
-            <label for="alturaInfo3D">Altura real (cm): *</label>
-            <input type="number" id="alturaInfo3D" min="1" required>
-        </div>
+        <label for="material3D">Material:</label>
+        <select id="material3D">
+            <option value="">Seleccione material...</option>
+            <option value="1">Acrílico con luz ($35/cm)</option>
+            <option value="2">Aluminio con luz ($25/cm)</option>
+            <option value="3">Acrílico sin luz ($30/cm)</option>
+            <option value="4">Aluminio sin luz ($20/cm)</option>
+        </select>
+        <small class="help-text">Precio por centímetro de altura</small>
+        
+        <label for="base3D">Base real (cm):</label>
+        <input type="number" id="base3D" placeholder="Ancho real de las letras">
+        <small class="help-text">Solo para mostrar en las medidas</small>
+        
+        <label for="alturaInfo3D">Altura real (cm):</label>
+        <input type="number" id="alturaInfo3D" placeholder="Alto real de las letras">
+        <small class="help-text">Solo para mostrar en las medidas</small>
     </div>
 
     <!-- Campos específicos para Letras Planas -->
     <div id="opcionesLetrasPlanas" class="form-group opciones-especificas" style="display:none;">
-        <label for="materialPlanas">Material:</label>
-        <select id="materialPlanas" required>
-            <option value="">Seleccione material</option>
-            <option value="1">Acrílico</option>
-            <option value="2">Aluminio</option>
-        </select>
         <label for="alturaPlanas">Altura para cotización (cm):</label>
-        <input type="number" id="alturaPlanas" min="1" required>
+        <input type="number" id="alturaPlanas" placeholder="Altura usada en el cálculo">
+        <small class="help-text">Esta altura se usa para calcular el precio</small>
         
-        <!-- CAMPOS AHORA OBLIGATORIOS -->
-        <div class="campos-informativos" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd;">
-            <label for="basePlanas">Base (cm): *</label>
-            <input type="number" id="basePlanas" min="1" required>
-            <label for="alturaInfoPlanas">Altura real (cm): *</label>
-            <input type="number" id="alturaInfoPlanas" min="1" required>
-        </div>
+        <label for="materialPlanas">Material:</label>
+        <select id="materialPlanas">
+            <option value="">Seleccione material...</option>
+            <option value="1">Acrílico ($18/cm)</option>
+            <option value="2">Aluminio ($12/cm)</option>
+        </select>
+        <small class="help-text">Precio por centímetro de altura</small>
+        
+        <label for="basePlanas">Base real (cm):</label>
+        <input type="number" id="basePlanas" placeholder="Ancho real de las letras">
+        <small class="help-text">Solo para mostrar en las medidas</small>
+        
+        <label for="alturaInfoPlanas">Altura real (cm):</label>
+        <input type="number" id="alturaInfoPlanas" placeholder="Alto real de las letras">
+        <small class="help-text">Solo para mostrar en las medidas</small>
     </div>
 
     <!-- Campos específicos para Banner -->
     <div id="opcionesBanner" class="form-group opciones-especificas" style="display:none;">
-        <label for="calidadBanner">Calidad:</label>
+        <label for="calidadBanner">Calidad del Banner:</label>
         <select id="calidadBanner">
-            <option value="1">720</option>
-            <option value="2">Alta</option>
+            <option value="">Seleccione calidad...</option>
+            <option value="1">720 DPI ($800/m²)</option>
+            <option value="2">Alta Calidad ($900/m²)</option>
         </select>
+        <small class="help-text">720 DPI: $800/m² | Alta Calidad: $900/m²</small>
     </div>
 
-    <!-- Campos específicos para Caja Circular -->
+    <!-- Opciones para Caja Circular - CAMPO ORIGINAL -->
     <div id="opcionesCircular" class="form-group opciones-especificas" style="display:none;">
-        <label for="areaCircular">Área total (cm²):</label>
-        <input type="number" id="areaCircular" min="1">
+    <label for="areaCircular">Área Circular (cm²):</label>
+    <input type="number" id="areaCircular" placeholder="Ej: 500">
+    <small class="help-text">Área en centímetros cuadrados × $45/cm²</small>
+</div>
+
+    <!-- Opciones para Caja de Doble Vista -->
+    <div id="opcionesDobleVista" class="form-group opciones-especificas" style="display:none;">
+        <label for="baseDobleVista">Base (cm):</label>
+        <input type="number" id="baseDobleVista" placeholder="Ej: 40">
+        <small class="help-text">Ancho de la caja doble vista</small>
+        
+        <label for="alturaDobleVista">Altura (cm):</label>
+        <input type="number" id="alturaDobleVista" placeholder="Ej: 30">
+        <small class="help-text">≤80cm: $45/cm | >80cm: $45/cm + $2,500</small>
     </div>
 
     <!-- Campos para otros productos -->
-    <div id="otroProducto" class="form-group" style="display:none;">
+    <div id="otroProducto" class="form-group opciones-especificas" style="display:none;">
         <label for="descripcionOtro">Descripción:</label>
-        <input type="text" id="descripcionOtro">
+        <input type="text" id="descripcionOtro" placeholder="Describe el producto personalizado">
+        <small class="help-text">Descripción detallada del producto</small>
+        
         <label for="costoOtro">Costo:</label>
-        <input type="number" id="costoOtro" min="0">
+        <input type="number" id="costoOtro" placeholder="Precio del producto">
+        <small class="help-text">Precio manual para producto personalizado</small>
     </div>
 
     <button type="button" onclick="agregarProducto()" class="btn-secondary">Agregar Producto</button>
@@ -253,34 +285,43 @@
             <div id="opcionesNeonEdit" class="form-group opciones-especificas" style="display:none;">
                 <label for="tipoNeonEdit">Tipo de Neón:</label>
                 <select id="tipoNeonEdit">
+                    <option value="">Seleccione tipo...</option>
                     <option value="1">Neón Normal</option>
                     <option value="2">Neón 2.0</option>
                 </select>
+                <small class="help-text">Normal: $18/cm² | 2.0: $25/cm²</small>
             </div>
 
-            <!-- Campos específicos para Impresión Lona -->
-            <div id="opcionesLonaEdit" class="form-group opciones-especificas" style="display:none;">
-                <label for="calidadLonaEdit">Calidad de Impresión:</label>
-                <select id="calidadLonaEdit">
-                    <option value="1">720</option>
-                    <option value="2">Alta</option>
-                    <option value="3">UV</option>
-                </select>
-            </div>
+            <!-- Opciones para Lona - CAMPOS ORIGINALES -->
+            <div id="opcionesLonaEditar" class="form-group opciones-especificas" style="display:none;">
+    <label for="calidadLonaEditar">Calidad de Lona:</label>
+    <select id="calidadLonaEditar">
+        <option value="">Seleccione calidad...</option>
+        <option value="1">720 DPI ($110/m²)</option>
+        <option value="2">Alta Calidad ($250/m²)</option>
+        <option value="3">UV Resistente ($340/m²)</option>
+    </select>
+    <small class="help-text">Calidad 720: $110/m² | Alta: $250/m² | UV: $340/m²</small>
+</div>
 
             <!-- Campos específicos para Impresión Vinil -->
             <div id="opcionesVinilEdit" class="form-group opciones-especificas" style="display:none;">
                 <label for="calidadVinilEdit">Calidad de Vinil:</label>
                 <select id="calidadVinilEdit">
-                    <option value="1">720</option>
-                    <option value="2">Alta</option>
-                    <option value="3">UV</option>
-                    <option value="4">UV 3M</option>
+                    <option value="">Seleccione calidad...</option>
+                    <option value="1">720 DPI ($224/m²)</option>
+                    <option value="2">Alta Calidad ($340/m²)</option>
+                    <option value="3">UV Resistente ($460/m²)</option>
+                    <option value="4">UV 3M Premium ($640/m²)</option>
                 </select>
+                <small class="help-text">720: $224/m² | Alta: $340/m² | UV: $460/m² | UV 3M: $640/m²</small>
             </div>
 
             <!-- Campos específicos para Letras 3D -->
             <div id="opcionesLetras3DEdit" class="form-group opciones-especificas" style="display:none;">
+                <label for="altura3DEdit">Altura para cotización (cm):</label>
+                <input type="number" id="altura3DEdit" placeholder="Altura usada en el cálculo">
+                
                 <label for="material3DEdit">Material:</label>
                 <select id="material3DEdit" required>
                     <option value="">Seleccione material</option>
@@ -303,37 +344,51 @@
 
             <!-- Campos específicos para Letras Planas -->
             <div id="opcionesLetrasPlanasEdit" class="form-group opciones-especificas" style="display:none;">
-                <label for="materialPlanasEdit">Material:</label>
-                <select id="materialPlanasEdit" required>
+                <label for="alturaPlanasEditar">Altura para cotización (cm):</label>
+                <input type="number" id="alturaPlanasEditar" placeholder="Altura usada en el cálculo">
+                
+                <label for="materialPlanasEditar">Material:</label>
+                <select id="materialPlanasEditar" required>
                     <option value="">Seleccione material</option>
                     <option value="1">Acrílico</option>
                     <option value="2">Aluminio</option>
                 </select>
-                <label for="alturaPlanasEdit">Altura para cotización (cm):</label>
-                <input type="number" id="alturaPlanasEdit" min="1" required>
+                <label for="alturaPlanasEditar">Altura para cotización (cm):</label>
+                <input type="number" id="alturaPlanasEditar" min="1" required>
                 
                 <!-- CAMPOS AHORA OBLIGATORIOS -->
                 <div class="campos-informativos" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd;">
-                    <label for="basePlanasEdit">Base (cm): *</label>
-                    <input type="number" id="basePlanasEdit" min="1" required>
-                    <label for="alturaInfoPlanasEdit">Altura real (cm): *</label>
-                    <input type="number" id="alturaInfoPlanasEdit" min="1" required>
+                    <label for="basePlanasEditar">Base (cm): *</label>
+                    <input type="number" id="basePlanasEditar" min="1" required>
+                    <label for="alturaInfoPlanasEditar">Altura real (cm): *</label>
+                    <input type="number" id="alturaInfoPlanasEditar" min="1" required>
                 </div>
             </div>
 
             <!-- Campos específicos para Banner -->
             <div id="opcionesBannerEdit" class="form-group opciones-especificas" style="display:none;">
-                <label for="calidadBannerEdit">Calidad:</label>
+                <label for="calidadBannerEdit">Calidad del Banner:</label>
                 <select id="calidadBannerEdit">
-                    <option value="1">720</option>
-                    <option value="2">Alta</option>
+                    <option value="">Seleccione calidad...</option>
+                    <option value="1">720 DPI ($800/m²)</option>
+                    <option value="2">Alta Calidad ($900/m²)</option>
                 </select>
+                <small class="help-text">720 DPI: $800/m² | Alta Calidad: $900/m²</small>
             </div>
 
             <!-- Campos específicos para Caja Circular -->
             <div id="opcionesCircularEdit" class="form-group opciones-especificas" style="display:none;">
-                <label for="areaCircularEdit">Área total (cm²):</label>
-                <input type="number" id="areaCircularEdit" min="1">
+                <label for="areaCircularEditar">Área Circular (cm²):</label>
+                <input type="number" id="areaCircularEditar" placeholder="Ej: 500">
+            </div>
+
+            <!-- Campos específicos para Caja de Doble Vista -->
+            <div id="opcionesDobleVistaEditar" class="form-group opciones-especificas" style="display:none;">
+                <label for="baseDobleVistaEditar">Base (cm):</label>
+                <input type="number" id="baseDobleVistaEditar" placeholder="Ej: 40">
+                
+                <label for="alturaDobleVistaEditar">Altura (cm):</label>
+                <input type="number" id="alturaDobleVistaEditar" placeholder="Ej: 30">
             </div>
 
             <!-- Campos para otros productos -->

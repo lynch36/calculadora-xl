@@ -18,24 +18,32 @@ export class ProductManager {
         };
 
         switch (tipo) {
-            case "1": // Caja de Acrílico - TUS PRECIOS ORIGINALES
+            case "1": // Caja de Acrílico
                 if (!base || !altura) {
                     Helpers.mostrarMensaje("Ingrese las medidas", "error");
                     return null;
                 }
+                
+                const baseMetros = base / 100;
+                const alturaMetros = altura / 100;
+                
                 producto.descripcion = "Caja de Acrílico";
-                producto.precio = Calculations.sumaArea(base, altura, 18); // Tu precio original
-                producto.medidas = `${base}cm x ${altura}cm`;
+                producto.precio = (baseMetros * alturaMetros) * 1800;
+                producto.medidas = `${base}cm x ${altura}cm (${(baseMetros * alturaMetros).toFixed(2)}m²)`;
                 break;
 
-            case "2": // Caja de Lona - TU PRECIO ORIGINAL
+            case "2": // Caja de Lona
                 if (!base || !altura) {
                     Helpers.mostrarMensaje("Ingrese las medidas", "error");
                     return null;
                 }
+                
+                const baseMetrosLona = base / 100;
+                const alturaMetrosLona = altura / 100;
+                
                 producto.descripcion = "Caja de Lona";
-                producto.precio = Calculations.sumaArea(base, altura, 15); // Tu precio original
-                producto.medidas = `${base}cm x ${altura}cm`;
+                producto.precio = (baseMetrosLona * alturaMetrosLona) * 1500;
+                producto.medidas = `${base}cm x ${altura}cm (${(baseMetrosLona * alturaMetrosLona).toFixed(2)}m²)`;
                 break;
 
             case "3": // Neón - TUS PRECIOS ORIGINALES
@@ -53,12 +61,12 @@ export class ProductManager {
                 producto.medidas = `${base}cm x ${altura}cm`;
                 break;
 
-            case "4": // Impresión Lona - TUS PRECIOS ORIGINALES
+            case "4": // Impresión Lona - PRECIOS ORIGINALES
                 if (!base || !altura) {
                     Helpers.mostrarMensaje("Ingrese las medidas", "error");
                     return null;
                 }
-                const calidadLona = document.getElementById(`calidadLona${suffix === 'Edicion' ? 'Edit' : ''}`)?.value;
+                const calidadLona = document.getElementById(`calidadLona${suffix === 'Editar' ? 'Editar' : ''}`)?.value;
                 if (!calidadLona) {
                     Helpers.mostrarMensaje("Seleccione la calidad de lona", "error");
                     return null;
@@ -69,12 +77,12 @@ export class ProductManager {
                 producto.medidas = `${base}cm x ${altura}cm`;
                 break;
 
-            case "5": // Impresión Vinil - TUS PRECIOS ORIGINALES
+            case "5": // Impresión Vinil - PRECIOS ORIGINALES
                 if (!base || !altura) {
                     Helpers.mostrarMensaje("Ingrese las medidas", "error");
                     return null;
                 }
-                const calidadVinil = document.getElementById(suffix === 'Edicion' ? 'calidadVinilEdit' : 'calidadVinil')?.value;
+                const calidadVinil = document.getElementById(suffix === 'Editar' ? 'calidadVinilEditar' : 'calidadVinil')?.value;
                 if (!calidadVinil) {
                     Helpers.mostrarMensaje("Seleccione la calidad del vinil", "error");
                     return null;
@@ -86,12 +94,12 @@ export class ProductManager {
                 break;
 
             case "6": // Letras 3D - TUS PRECIOS ORIGINALES
-                const altura3D = parseFloat(document.getElementById(suffix === 'Edicion' ? 'altura3DEdit' : 'altura3D')?.value);
-                const material3D = document.getElementById(suffix === 'Edicion' ? 'material3DEdit' : 'material3D')?.value;
+                const altura3D = parseFloat(document.getElementById(suffix === 'Editar' ? 'altura3DEditar' : 'altura3D')?.value);
+                const material3D = document.getElementById(suffix === 'Editar' ? 'material3DEditar' : 'material3D')?.value;
 
                 // CAMPOS INFORMATIVOS AHORA OBLIGATORIOS
-                const base3D = parseFloat(document.getElementById(suffix === 'Edicion' ? 'base3DEdit' : 'base3D')?.value);
-                const alturaInfo3D = parseFloat(document.getElementById(suffix === 'Edicion' ? 'alturaInfo3DEdit' : 'alturaInfo3D')?.value);
+                const base3D = parseFloat(document.getElementById(suffix === 'Editar' ? 'base3DEditar' : 'base3D')?.value);
+                const alturaInfo3D = parseFloat(document.getElementById(suffix === 'Editar' ? 'alturaInfo3DEditar' : 'alturaInfo3D')?.value);
 
                 // VALIDACIONES - Todos los campos obligatorios
                 if (!altura3D) {
@@ -122,12 +130,12 @@ export class ProductManager {
                 break;
 
             case "7": // Letras Planas - TUS PRECIOS ORIGINALES
-                const alturaPlanas = parseFloat(document.getElementById(suffix === 'Edicion' ? 'alturaPlanasEdit' : 'alturaPlanas')?.value);
-                const materialPlanas = document.getElementById(suffix === 'Edicion' ? 'materialPlanasEdit' : 'materialPlanas')?.value;
+                const alturaPlanas = parseFloat(document.getElementById(suffix === 'Editar' ? 'alturaPlanasEditar' : 'alturaPlanas')?.value);
+                const materialPlanas = document.getElementById(suffix === 'Editar' ? 'materialPlanasEditar' : 'materialPlanas')?.value;
                 
                 // CAMPOS INFORMATIVOS AHORA OBLIGATORIOS
-                const basePlanas = parseFloat(document.getElementById(suffix === 'Edicion' ? 'basePlanasEdit' : 'basePlanas')?.value);
-                const alturaInfoPlanas = parseFloat(document.getElementById(suffix === 'Edicion' ? 'alturaInfoPlanasEdit' : 'alturaInfoPlanas')?.value);
+                const basePlanas = parseFloat(document.getElementById(suffix === 'Editar' ? 'basePlanasEditar' : 'basePlanas')?.value);
+                const alturaInfoPlanas = parseFloat(document.getElementById(suffix === 'Editar' ? 'alturaInfoPlanasEditar' : 'alturaInfoPlanas')?.value);
                 
                 // VALIDACIONES - Todos los campos obligatorios
                 if (!alturaPlanas) {
@@ -162,7 +170,7 @@ export class ProductManager {
                     Helpers.mostrarMensaje("Ingrese las medidas", "error");
                     return null;
                 }
-                const calidadBanner = document.getElementById(suffix === 'Edicion' ? 'calidadBannerEdit' : 'calidadBanner')?.value;
+                const calidadBanner = document.getElementById(suffix === 'Editar' ? 'calidadBannerEditar' : 'calidadBanner')?.value;
                 if (!calidadBanner) {
                     Helpers.mostrarMensaje("Seleccione la calidad del banner", "error");
                     return null;
@@ -174,7 +182,7 @@ export class ProductManager {
                 break;
 
             case "9": // Caja Circular - TU PRECIO ORIGINAL
-                const areaCircular = parseFloat(document.getElementById(`areaCircular${suffix === 'Edicion' ? 'Edit' : ''}`)?.value);
+                const areaCircular = parseFloat(document.getElementById(`areaCircular${suffix === 'Editar' ? 'Editar' : ''}`)?.value);
                 if (!areaCircular) {
                     Helpers.mostrarMensaje("Ingrese el área", "error");
                     return null;
@@ -196,6 +204,30 @@ export class ProductManager {
                 producto.descripcion = descripcionOtro;
                 producto.precio = costoOtro;
                 producto.medidas = ""; // CAMBIAR: Dejar vacío en lugar de "Personalizado"
+                break;
+
+            case "11": // Caja de Doble Vista
+                const baseDobleVista = document.getElementById(`baseDobleVista${suffix}`);
+                const alturaDobleVista = document.getElementById(`alturaDobleVista${suffix}`);
+                
+                if (!baseDobleVista || !baseDobleVista.value || !alturaDobleVista || !alturaDobleVista.value) {
+                    Helpers.mostrarMensaje("Ingrese base y altura para caja de doble vista", "error");
+                    return null;
+                }
+                
+                const baseDoble = parseFloat(baseDobleVista.value) || 0;
+                const alturaDoble = parseFloat(alturaDobleVista.value) || 0;
+                const perimetro = baseDoble + alturaDoble;
+                
+                producto.descripcion = "Caja de Doble Vista";
+                
+                if (perimetro <= 80) {
+                    producto.precio = perimetro * 45;
+                    producto.medidas = `${baseDoble}cm + ${alturaDoble}cm = ${perimetro}cm (≤80cm)`;
+                } else {
+                    producto.precio = (perimetro * 45) + 2500;
+                    producto.medidas = `${baseDoble}cm + ${alturaDoble}cm = ${perimetro}cm (>80cm +$2,500)`;
+                }
                 break;
 
             default:
@@ -254,25 +286,28 @@ export class ProductManager {
         return this.productos.reduce((total, producto) => total + producto.precio, 0);
     }
 
-    limpiarFormulario(suffix = '') {
-        const campos = [
-            'base', 'altura', 'altura3D', 'alturaPlanas', 'areaCircular', 
-            'descripcionOtro', 'costoOtro',
-            // CAMPOS INFORMATIVOS CON DOS ALTURAS
-            'base3D', 'alturaInfo3D', 'basePlanas', 'alturaInfoPlanas'
-        ];
+    limpiarFormulario(esEdicion = false) {
+        const suffix = esEdicion ? 'Editar' : '';
         
-        campos.forEach(campo => {
-            const elemento = document.getElementById(campo + suffix);
-            if (elemento) elemento.value = '';
+        // Limpiar todos los campos de input
+        const inputs = document.querySelectorAll(`input${suffix ? `[id$="${suffix}"]` : ':not([id*="Editar"])'}`);
+        inputs.forEach(input => {
+            if (input.type === 'number' || input.type === 'text') {
+                input.value = '';
+            }
         });
-
-        // Limpiar también los selects
-        const selects = ['tipoNeon', 'calidadLona', 'calidadVinil', 'material3D', 'materialPlanas', 'calidadBanner'];
+        
+        // Limpiar selects
+        const selects = document.querySelectorAll(`select${suffix ? `[id$="${suffix}"]` : ':not([id*="Editar"])'}`);
         selects.forEach(select => {
-            const elemento = document.getElementById(select + suffix);
-            if (elemento) elemento.selectedIndex = 0;
+            select.value = '';
         });
+        
+        // IMPORTANTE: Ocultar todos los campos específicos
+        const formManager = window.CotizacionApp?.formManager;
+        if (formManager) {
+            formManager.ocultarTodosLosCampos(esEdicion);
+        }
     }
 
     obtenerProductos() {

@@ -172,34 +172,31 @@ class CotizacionApp {
 
     // ACTUALIZAR - Método para agregar producto
     agregarProducto() {
-        // Verificar si es categoría neón (caso especial)
         const categoria = document.getElementById('categoriaProducto').value;
-        let tipoProducto;
+        const tipo = document.getElementById('tipoProducto').value;
         
         if (categoria === 'neon') {
-            // Para neón, usamos el tipo '3' directamente
-            tipoProducto = '3';
-        } else {
-            // Para otras categorías, obtenemos el valor del select de subcategorías
-            tipoProducto = document.getElementById('tipoProducto').value;
-            
-            if (!tipoProducto || tipoProducto === '') {
-                alert("Seleccione un tipo de producto");
-                return;
+            const producto = this.productManager.crearProducto('3');
+            if (producto) {
+                this.productManager.agregarProducto(producto);
+                this.productManager.limpiarFormulario(); // ← LIMPIA CAMPOS
+                this.categoryManager.limpiarSelecciones(false); // ← LIMPIA SELECTS
+                this.formManager.ocultarTodosLosCampos(false); // ← OCULTA TODO
             }
+            return;
         }
-
-        const producto = this.productManager.crearProducto(tipoProducto);
         
+        if (!tipo) {
+            alert("Seleccione un tipo de producto");
+            return;
+        }
+        
+        const producto = this.productManager.crearProducto(tipo);
         if (producto) {
             this.productManager.agregarProducto(producto);
-            this.productManager.limpiarFormulario();
-            
-            // NUEVO - Limpiar selecciones de categoría
-            this.categoryManager.limpiarSelecciones(false);
-            
-            // Ocultar campos específicos
-            this.formManager.ocultarTodosLosCampos(false);
+            this.productManager.limpiarFormulario(); // ← LIMPIA CAMPOS  
+            this.categoryManager.limpiarSelecciones(false); // ← LIMPIA SELECTS
+            this.formManager.ocultarTodosLosCampos(false); // ← OCULTA TODO
         }
     }
 
