@@ -11,24 +11,40 @@ class CotizacionApp {
             editando: false,
             productosArray: []
         };
-        this.init();
-    }
-
-    init() {
+        // 1. Inicializar managers
         this.productManager = new ProductManager();
+        this.categoryManager = new CategoryManager();
         this.formManager = new FormManager();
-        this.categoryManager = new CategoryManager(); // NUEVO
         this.quoteGenerator = new QuoteGenerator();
-        this.exportManager = new ExportManager(this.quoteGenerator);
+        this.exportManager = new ExportManager();
         
+        // 2. Configurar relaciones
+        this.categoryManager.setupEventListeners(this.formManager);
+        this.quoteGenerator.setProductManager(this.productManager); // ✅ DESCOMENTA esta línea
+    
+        // 3. Event listeners específicos de la app
         this.setupEventListeners();
+        
         this.exposeGlobalFunctions();
     }
 
     setupEventListeners() {
-        // NUEVO - Configurar event listeners para categorías
-        this.categoryManager.setupEventListeners(this.formManager);
+        // Event listener para zona de servicio
+        const zonaServicio = document.getElementById('zonaServicio');
+        if (zonaServicio) {
+            zonaServicio.addEventListener('change', () => {
+                this.handleZonaChange();
+            });
+        }
 
+        // ✅ NUEVO: Event listener para kilómetros
+        const kilometros = document.getElementById('kilometros');
+        if (kilometros) {
+            kilometros.addEventListener('input', () => {
+                this.handleKilometrosChange();
+            });
+        }
+        
         // Event listeners para checkboxes (actualizar vista previa en tiempo real)
         ['requiereFactura', 'requiereInstalacion', 'editarFactura', 'editarInstalacion'].forEach(id => {
             const elemento = document.getElementById(id);
@@ -48,6 +64,57 @@ class CotizacionApp {
         }
 
         console.log('Event listeners configurados');
+    }
+
+    handleZonaChange() {
+        const zona = document.getElementById('zonaServicio')?.value;
+        const campoKilometros = document.getElementById('campoKilometros');
+        
+        console.log('🌍 Zona cambiada a:', zona);
+        
+        // Mostrar/ocultar campo de kilómetros según la zona
+        if (zona === 'otro') {
+            campoKilometros.style.display = 'block';
+        } else {
+            campoKilometros.style.display = 'none';
+            // Limpiar kilómetros cuando se cambia a CDMX
+            document.getElementById('kilometros').value = '';
+        }
+        
+        // Recalcular viáticos de todos los productos existentes
+        if (this.productManager && this.productManager.productos.length > 0) {
+            this.productManager.recalcularViaticos();
+            this.productManager.actualizarTabla();
+        }
+        
+        // Mostrar mensaje
+        let mensaje;
+        if (zona === 'cdmx') {
+            mensaje = `Viáticos de $1,000 distribuidos entre ${this.productManager.productos.length} productos`;
+        } else {
+            const km = document.getElementById('kilometros').value;
+            mensaje = km ? `Viáticos por ${km}km distribuidos entre productos` : 'Especifique kilómetros para calcular viáticos';
+        }
+        console.log('✅', mensaje);
+    }
+
+    // ✅ NUEVO: Manejar cambios en kilómetros
+    handleKilometrosChange() {
+        const zona = document.getElementById('zonaServicio')?.value;
+        const kilometros = document.getElementById('kilometros').value;
+        
+        console.log('🛣️ Kilómetros cambiados a:', kilometros);
+        
+        // Solo recalcular si estamos en zona "otro" y hay productos
+        if (zona === 'otro' && this.productManager && this.productManager.productos.length > 0) {
+            this.productManager.recalcularViaticos();
+            this.productManager.actualizarTabla();
+            
+            if (kilometros) {
+                const viaticoTotal = parseFloat(kilometros) * 20;
+                console.log(`✅ Viáticos por ${kilometros}km ($${viaticoTotal}) distribuidos entre ${this.productManager.productos.length} productos`);
+            }
+        }
     }
 
     exposeGlobalFunctions() {
@@ -179,9 +246,11 @@ class CotizacionApp {
             const producto = this.productManager.crearProducto('3');
             if (producto) {
                 this.productManager.agregarProducto(producto);
-                this.productManager.limpiarFormulario(); // ← LIMPIA CAMPOS
-                this.categoryManager.limpiarSelecciones(false); // ← LIMPIA SELECTS
-                this.formManager.ocultarTodosLosCampos(false); // ← OCULTA TODO
+                this.productManager.limpiarFormulario(); // ← Solo campos de producto
+                this.categoryManager.limpiarSelecciones(false); // ← Solo categoría/tipo  
+                this.formManager.ocultarTodosLosCampos(false); // ← Solo opciones específicas
+                
+                // NO tocar clienteNombre ni zonaServicio
             }
             return;
         }
@@ -194,9 +263,11 @@ class CotizacionApp {
         const producto = this.productManager.crearProducto(tipo);
         if (producto) {
             this.productManager.agregarProducto(producto);
-            this.productManager.limpiarFormulario(); // ← LIMPIA CAMPOS  
-            this.categoryManager.limpiarSelecciones(false); // ← LIMPIA SELECTS
-            this.formManager.ocultarTodosLosCampos(false); // ← OCULTA TODO
+            this.productManager.limpiarFormulario(); // ← Solo campos de producto  
+            this.categoryManager.limpiarSelecciones(false); // ← Solo categoría/tipo  
+            this.formManager.ocultarTodosLosCampos(false); // ← Solo opciones específicas
+            
+            // NO tocar clienteNombre ni zonaServicio
         }
     }
 
@@ -268,7 +339,7 @@ class CotizacionApp {
             cliente, 
             requiereFactura, 
             requiereInstalacion,
-            especificaciones // AGREGAR este parámetro
+            especificaciones
         );
 
         document.getElementById('vistaPrevia').textContent = vistaPrevia;
@@ -455,4 +526,33 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM cargado, inicializando app...');
     app = new CotizacionApp();
     window.CotizacionApp = app; // Exponer para debugging
+
+    // 1. Agregar precioBase a productos existentes
+    const productManager = window.CotizacionApp.productManager;
+
+    productManager.productos.forEach((producto, index) => {
+        if (!producto.precioBase) {
+            // El precio actual ES el precio base (sin viáticos aplicados aún)
+            producto.precioBase = producto.precio;
+            console.log(`✅ Producto ${index + 1}: precioBase = $${producto.precioBase}`);
+        }
+    });
+
+    // 2. Ahora recalcular viáticos
+    productManager.recalcularViaticos();
+
+    // 3. Verificar resultado
+    console.log('📋 Productos después del recálculo:');
+    productManager.productos.forEach((producto, index) => {
+        console.log(`Producto ${index + 1}:`, {
+            descripcion: producto.descripcion,
+            precioBase: producto.precioBase,
+            precioFinal: producto.precio,
+            viatico: producto.precio - producto.precioBase,
+            medidas: producto.medidas
+        });
+    });
+
+    // 4. Actualizar tabla
+    productManager.actualizarTabla();
 });

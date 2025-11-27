@@ -131,4 +131,42 @@ ${this.cotizacion.opciones.especificaciones}`;
     obtenerCotizacion() {
         return this.cotizacion;
     }
+
+    setProductManager(productManager) {
+        this.productManager = productManager;
+    }
+
+    actualizarTotales() {
+        const subtotal = this.productManager.calcularSubtotal();
+        const iva = Calculations.calcularIVA(subtotal);
+        const total = subtotal + iva;
+    
+        const zona = document.getElementById('zonaServicio')?.value;
+        const tieneViaticos = zona === 'cdmx' && this.productManager.productos.length > 0;
+        
+        const resumenElement = document.getElementById('resumenCostos');
+        if (resumenElement) {
+            resumenElement.innerHTML = `
+                <h3>💰 Resumen de Costos</h3>
+                <div class="resumen-linea">
+                    <span>Subtotal:</span>
+                    <span>$${subtotal.toFixed(2)}</span>
+                </div>
+                ${tieneViaticos ? `
+                <div class="resumen-linea viaticos">
+                    <span>Viáticos CDMX:</span>
+                    <span>$1,000.00 (distribuido)</span>
+                </div>
+                ` : ''}
+                <div class="resumen-linea">
+                    <span>IVA (16%):</span>
+                    <span>$${iva.toFixed(2)}</span>
+                </div>
+                <div class="resumen-linea total">
+                    <span><strong>Total:</strong></span>
+                    <span><strong>$${total.toFixed(2)}</strong></span>
+                </div>
+            `;
+        }
+    }
 }

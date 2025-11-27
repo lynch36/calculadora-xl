@@ -4,6 +4,7 @@ import { Helpers } from '../utils/helpers.js';
 export class ProductManager {
     constructor() {
         this.productos = [];
+        this.contadorId = 1;
     }
 
     crearProducto(tipo, suffix = '') {
@@ -235,19 +236,139 @@ export class ProductManager {
                 return null;
         }
 
+        if (producto && producto.precio) {
+            // IMPORTANTE: Guardar precio base ANTES de calcular viáticos
+            producto.precioBase = producto.precio;
+            console.log(`💾 Precio base guardado: $${producto.precioBase} para ${producto.descripcion}`);
+            
+            // Calcular precio con viáticos
+            const precioConViaticos = this.calcularPrecioConViaticos(producto.precio);
+            const viaticoPorProducto = precioConViaticos - producto.precio;
+            
+            // Actualizar precio final
+            producto.precio = precioConViaticos;
+            
+            // Agregar info de viático en medidas si aplica
+            if (viaticoPorProducto > 0) {
+                producto.medidas += ` (incluye $${viaticoPorProducto.toFixed(2)} viático)`;
+                console.log(`💰 Viático agregado: +$${viaticoPorProducto.toFixed(2)}`);
+            }
+            
+            console.log(`✅ Producto final: ${producto.descripcion} = $${producto.precio}`);
+        }
+
         return producto;
     }
 
     agregarProducto(producto) {
         this.productos.push(producto);
-        this.actualizarListaHTML();
-        Helpers.mostrarMensaje("Producto agregado correctamente", "success");
+        console.log(`✅ Producto agregado. Total productos: ${this.productos.length}`);
+        
+        // Recalcular viáticos de TODOS los productos
+        this.recalcularViaticos();
+        
+        this.actualizarTabla();
+        this.actualizarTotales();
     }
 
     eliminarProducto(index) {
         this.productos.splice(index, 1);
-        this.actualizarListaHTML(); // Actualizar lista principal
-        Helpers.mostrarMensaje("Producto eliminado", "success");
+        console.log(`🗑️ Producto eliminado. Total productos: ${this.productos.length}`);
+        
+        // Recalcular viáticos después de eliminar
+        this.recalcularViaticos();
+        
+        this.actualizarTabla();
+        this.actualizarTotales();
+    }
+
+    recalcularViaticos() {
+        const zona = document.getElementById('zonaServicio')?.value;
+        console.log(`🔄 Recalculando viáticos. Zona: ${zona}, Productos: ${this.productos.length}`);
+        
+        if (this.productos.length === 0) return;
+        
+        if (zona === 'cdmx') {
+            // CDMX: $1000 fijos distribuidos entre productos
+            const viaticoPorProducto = 1000 / this.productos.length;
+            console.log(`💰 Viático CDMX por producto: $${viaticoPorProducto.toFixed(2)}`);
+            
+            this.productos.forEach((producto, index) => {
+                if (!producto.precioBase) {
+                    producto.precioBase = producto.precio;
+                    console.log(`⚠️ PrecioBase faltante, usando precio actual: $${producto.precioBase}`);
+                }
+                
+                // Remover texto de viático anterior
+                producto.medidas = producto.medidas.replace(/ \(incluye \$[\d.,]+ viático.*?\)/, '');
+                
+                // Aplicar nuevo viático CDMX
+                producto.precio = producto.precioBase + viaticoPorProducto;
+                producto.medidas += ` (incluye $${viaticoPorProducto.toFixed(2)} viático CDMX)`;
+                
+                console.log(`  📦 Producto ${index + 1}: $${producto.precioBase.toFixed(2)} + $${viaticoPorProducto.toFixed(2)} = $${producto.precio.toFixed(2)}`);
+            });
+            
+        } else if (zona === 'otro') {
+            // Otro estado: viáticos por kilómetros
+            const kilometros = parseFloat(document.getElementById('kilometros')?.value) || 0;
+            
+            if (kilometros > 0) {
+                const viaticoTotal = kilometros * 20;
+                const viaticoPorProducto = viaticoTotal / this.productos.length;
+                console.log(`🛣️ Viático por km: ${kilometros}km × $20 = $${viaticoTotal}, por producto: $${viaticoPorProducto.toFixed(2)}`);
+                
+                this.productos.forEach((producto, index) => {
+                    if (!producto.precioBase) {
+                        producto.precioBase = producto.precio;
+                        console.log(`⚠️ PrecioBase faltante, usando precio actual: $${producto.precioBase}`);
+                    }
+                    
+                    // Remover texto de viático anterior
+                    producto.medidas = producto.medidas.replace(/ \(incluye \$[\d.,]+ viático.*?\)/, '');
+                    
+                    // Aplicar nuevo viático por kilómetros
+                    producto.precio = producto.precioBase + viaticoPorProducto;
+                    producto.medidas += ` (incluye $${viaticoPorProducto.toFixed(2)} viático ${kilometros}km)`;
+                    
+                    console.log(`  📦 Producto ${index + 1}: $${producto.precioBase.toFixed(2)} + $${viaticoPorProducto.toFixed(2)} = $${producto.precio.toFixed(2)}`);
+                });
+            } else {
+                // Sin kilómetros especificados, remover viáticos
+                console.log('🚫 Sin kilómetros especificados, removiendo viáticos');
+                this.productos.forEach((producto, index) => {
+                    if (producto.precioBase) {
+                        producto.medidas = producto.medidas.replace(/ \(incluye \$[\d.,]+ viático.*?\)/, '');
+                        producto.precio = producto.precioBase;
+                        console.log(`  📦 Producto ${index + 1}: viático removido, precio: $${producto.precio.toFixed(2)}`);
+                    }
+                });
+            }
+        }
+    }
+
+    calcularPrecioConViaticos(precioBase) {
+        const zona = document.getElementById('zonaServicio')?.value;
+        
+        if (zona === 'cdmx') {
+            // CDMX: $1000 distribuidos entre productos
+            const totalProductosActual = this.productos.length + 1;
+            const viaticoPorProducto = 1000 / totalProductosActual;
+            console.log(`💰 Viático CDMX calculado: $${viaticoPorProducto.toFixed(2)} (${totalProductosActual} productos)`);
+            return precioBase + viaticoPorProducto;
+        } else if (zona === 'otro') {
+            // Otro estado: viáticos por kilómetros
+            const kilometros = parseFloat(document.getElementById('kilometros')?.value) || 0;
+            if (kilometros > 0) {
+                const viaticoTotal = kilometros * 20;
+                const totalProductosActual = this.productos.length + 1;
+                const viaticoPorProducto = viaticoTotal / totalProductosActual;
+                console.log(`🛣️ Viático km calculado: ${kilometros}km × $20 = $${viaticoTotal}, por producto: $${viaticoPorProducto.toFixed(2)}`);
+                return precioBase + viaticoPorProducto;
+            }
+        }
+        
+        return precioBase;
     }
 
     actualizarListaHTML() {
@@ -289,18 +410,36 @@ export class ProductManager {
     limpiarFormulario(esEdicion = false) {
         const suffix = esEdicion ? 'Editar' : '';
         
-        // Limpiar todos los campos de input
-        const inputs = document.querySelectorAll(`input${suffix ? `[id$="${suffix}"]` : ':not([id*="Editar"])'}`);
-        inputs.forEach(input => {
-            if (input.type === 'number' || input.type === 'text') {
+        // ❌ PROBLEMA: Esto limpia TODO (incluyendo cliente y zona)
+        // const inputs = document.querySelectorAll(`input${suffix ? `[id$="${suffix}"]` : ':not([id*="Editar"])'}`);
+        
+        // ✅ SOLUCIÓN: Solo limpiar campos específicos de productos
+        const camposProducto = [
+            'base', 'altura', 'grosor', 'cantidad', 'cantidadPlanas',
+            'descripcionOtro', 'costoOtro', 'diametroCircular',
+            'baseDobleVista', 'alturaDobleVista', 'areaCircular',
+            'altura3D', 'base3D', 'alturaInfo3D', 'alturaPlanas', 
+            'basePlanas', 'alturaInfoPlanas'
+        ];
+        
+        camposProducto.forEach(campo => {
+            const input = document.getElementById(`${campo}${suffix}`);
+            if (input) {
                 input.value = '';
             }
         });
         
-        // Limpiar selects
-        const selects = document.querySelectorAll(`select${suffix ? `[id$="${suffix}"]` : ':not([id*="Editar"])'}`);
-        selects.forEach(select => {
-            select.value = '';
+        // Limpiar selects de productos (NO cliente ni zona)
+        const selectsProducto = [
+            'categoriaProducto', 'tipoProducto', 'tipoNeon', 'calidadLona',
+            'calidadVinil', 'calidadBanner', 'material3D', 'materialPlanas'
+        ];
+        
+        selectsProducto.forEach(select => {
+            const elemento = document.getElementById(`${select}${suffix}`);
+            if (elemento) {
+                elemento.value = '';
+            }
         });
         
         // IMPORTANTE: Ocultar todos los campos específicos
@@ -327,5 +466,65 @@ export class ProductManager {
             this.productos[index].precio = parseFloat(valor);
             Helpers.mostrarMensaje("Precio actualizado", "success");
         }
+    }
+
+    calcularPrecioFinal(precioBase) {
+        const zona = document.getElementById('zonaServicio')?.value;
+        const totalProductos = this.productos.length + 1; // +1 por el producto actual
+        
+        let viatico = 0;
+        if (zona === 'cdmx') {
+            viatico = 1000 / totalProductos; // Distribuir $1000 entre productos
+        }
+        
+        return precioBase + viatico;
+    }
+
+    // ✅ MÉTODO FALTANTE: actualizarTabla
+    actualizarTabla() {
+        console.log('🔄 Actualizando tabla de productos...');
+        this.actualizarListaHTML();
+    }
+
+    // ✅ MÉTODO MEJORADO: actualizarTotales con validación
+    actualizarTotales() {
+        console.log('💰 Actualizando totales...');
+        
+        // Verificar si quoteGenerator existe y tiene productManager configurado
+        if (window.CotizacionApp?.quoteGenerator) {
+            // Asegurarse de que el quoteGenerator tenga la referencia al productManager
+            if (!window.CotizacionApp.quoteGenerator.productManager) {
+                console.warn('⚠️ QuoteGenerator no tiene ProductManager configurado, configurando...');
+                window.CotizacionApp.quoteGenerator.setProductManager(this);
+            }
+            
+            try {
+                window.CotizacionApp.quoteGenerator.actualizarTotales();
+            } catch (error) {
+                console.error('❌ Error al actualizar totales con QuoteGenerator:', error);
+                // Fallback al método básico
+                this.actualizarTotalesBasico();
+            }
+        } else {
+            // Fallback: actualizar solo el total básico
+            this.actualizarTotalesBasico();
+        }
+    }
+
+    // ✅ MÉTODO AUXILIAR: fallback para totales básicos
+    actualizarTotalesBasico() {
+        const total = this.calcularTotal();
+        console.log(`📊 Total básico calculado: $${total.toFixed(2)}`);
+        
+        // Buscar elemento de total y actualizar si existe
+        const totalElement = document.querySelector('.total-productos, #totalFinal');
+        if (totalElement) {
+            totalElement.innerHTML = `<strong>Total: $${total.toFixed(2)} MXN</strong>`;
+        }
+    }
+
+    // ✅ MÉTODO ADICIONAL: calcularSubtotal (requerido por quote-generator)
+    calcularSubtotal() {
+        return this.calcularTotal(); // Alias para compatibilidad
     }
 }

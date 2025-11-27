@@ -32,6 +32,23 @@
     <input type="text" id="clienteNombre" required>
   </div>
 
+  <!-- NUEVO campo zona -->
+  <div class="form-group">
+    <label for="zonaServicio">Zona de servicio:</label>
+    <select id="zonaServicio">
+        <option value="cdmx">Área Metropolitana/CDMX (+$1,000 viáticos)</option>
+        <option value="otro">Otro Estado (viáticos por km)</option>
+    </select>
+    <small class="help-text">Los viáticos se distribuyen automáticamente entre productos</small>
+  </div>
+
+  <!-- ✅ NUEVO: Campo para kilómetros -->
+  <div class="form-group" id="campoKilometros" style="display: none;">
+    <label for="kilometros">Kilómetros de distancia:</label>
+    <input type="number" id="kilometros" min="0" step="1" placeholder="Ej: 150">
+    <small class="help-text">Se cobran $20 por kilómetro distribuidos entre productos</small>
+  </div>
+
   <div class="form-group" id="productoForm">
     <h3>Agregar Producto</h3>
     
@@ -77,17 +94,17 @@
         <small class="help-text">Normal: $18/cm² | 2.0: $25/cm²</small>
     </div>
 
-    <!-- Opciones para Lona - CAMPOS ORIGINALES -->
+    <!-- Opciones para Lona -->
     <div id="opcionesLona" class="form-group opciones-especificas" style="display:none;">
-    <label for="calidadLona">Calidad de Lona:</label>
-    <select id="calidadLona">
-        <option value="">Seleccione calidad...</option>
-        <option value="1">720 DPI ($110/m²)</option>
-        <option value="2">Alta Calidad ($250/m²)</option>
-        <option value="3">UV Resistente ($340/m²)</option>
-    </select>
-    <small class="help-text">Calidad 720: $110/m² | Alta: $250/m² | UV: $340/m²</small>
-</div>
+        <label for="calidadLona">Calidad de Lona:</label>
+        <select id="calidadLona">
+            <option value="">Seleccione calidad...</option>
+            <option value="1">720 DPI ($110/m²)</option>
+            <option value="2">Alta Calidad ($250/m²)</option>
+            <option value="3">UV Resistente ($340/m²)</option>
+        </select>
+        <small class="help-text">720: $110/m² | Alta: $250/m² | UV: $340/m²</small>
+    </div>
 
     <!-- Opciones para Vinil - CAMPOS ORIGINALES -->
     <div id="opcionesVinil" class="form-group opciones-especificas" style="display:none;">

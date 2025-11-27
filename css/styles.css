@@ -286,6 +286,18 @@ button {
     color: #666;
 }
 
+.resumen-linea.viaticos {
+    color: #2196F3;
+    font-style: italic;
+    border-bottom: 1px dashed #ddd;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+}
+
+.resumen-linea.viaticos::before {
+    content: "✈️ ";
+}
+
 @media (max-width: 768px) {
     .container {
         padding: 10px;
