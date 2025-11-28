@@ -37,13 +37,29 @@ class CotizacionApp {
             });
         }
 
-        // ✅ NUEVO: Event listener para kilómetros
+        // Event listener para kilómetros
         const kilometros = document.getElementById('kilometros');
         if (kilometros) {
             kilometros.addEventListener('input', () => {
-                this.handleKilometrosChange();
+                this.handleViaticosChange();
             });
         }
+
+        // Event listener para monto extra
+        const montoExtra = document.getElementById('montoExtra');
+        if (montoExtra) {
+            montoExtra.addEventListener('input', () => {
+                this.handleViaticosChange();
+            });
+        }
+
+        // ✅ NUEVO: Event listeners para tipo de viático (implícito/explícito)
+        const radiosTipoViatico = document.querySelectorAll('input[name="tipoViatico"]');
+        radiosTipoViatico.forEach(radio => {
+            radio.addEventListener('change', () => {
+                this.handleTipoViaticoChange();
+            });
+        });
         
         // Event listeners para checkboxes (actualizar vista previa en tiempo real)
         ['requiereFactura', 'requiereInstalacion', 'editarFactura', 'editarInstalacion'].forEach(id => {
@@ -66,6 +82,29 @@ class CotizacionApp {
         console.log('Event listeners configurados');
     }
 
+    // ✅ NUEVO: Manejar cambio de tipo de viático
+    handleTipoViaticoChange() {
+        const tipoViatico = document.querySelector('input[name="tipoViatico"]:checked')?.value;
+        console.log('🔄 Tipo de viático cambiado a:', tipoViatico);
+        
+        // Recalcular viáticos con el nuevo tipo
+        if (this.productManager && this.productManager.productos.length > 0) {
+            this.productManager.recalcularViaticos();
+            this.productManager.actualizarTabla();
+            
+            const zona = document.getElementById('zonaServicio')?.value;
+            if (zona === 'cdmx') {
+                console.log(`✅ Viáticos CDMX ahora ${tipoViatico === 'explicito' ? 'como producto separado' : 'incluidos en productos'}`);
+            } else if (zona === 'otro') {
+                const km = document.getElementById('kilometros').value;
+                const extra = document.getElementById('montoExtra').value;
+                if (km || extra) {
+                    console.log(`✅ Viáticos otros estados ahora ${tipoViatico === 'explicito' ? 'como producto separado' : 'incluidos en productos'}`);
+                }
+            }
+        }
+    }
+
     handleZonaChange() {
         const zona = document.getElementById('zonaServicio')?.value;
         const campoKilometros = document.getElementById('campoKilometros');
@@ -77,8 +116,9 @@ class CotizacionApp {
             campoKilometros.style.display = 'block';
         } else {
             campoKilometros.style.display = 'none';
-            // Limpiar kilómetros cuando se cambia a CDMX
+            // Limpiar kilómetros y monto extra cuando se cambia a CDMX
             document.getElementById('kilometros').value = '';
+            document.getElementById('montoExtra').value = '';
         }
         
         // Recalcular viáticos de todos los productos existentes
@@ -88,32 +128,51 @@ class CotizacionApp {
         }
         
         // Mostrar mensaje
-        let mensaje;
-        if (zona === 'cdmx') {
-            mensaje = `Viáticos de $1,000 distribuidos entre ${this.productManager.productos.length} productos`;
-        } else {
-            const km = document.getElementById('kilometros').value;
-            mensaje = km ? `Viáticos por ${km}km distribuidos entre productos` : 'Especifique kilómetros para calcular viáticos';
-        }
-        console.log('✅', mensaje);
+        this.mostrarMensajeViaticos();
     }
 
-    // ✅ NUEVO: Manejar cambios en kilómetros
-    handleKilometrosChange() {
+    handleViaticosChange() {
         const zona = document.getElementById('zonaServicio')?.value;
         const kilometros = document.getElementById('kilometros').value;
+        const montoExtra = document.getElementById('montoExtra').value;
         
-        console.log('🛣️ Kilómetros cambiados a:', kilometros);
+        console.log('🛣️ Viáticos cambiados - Km:', kilometros, 'Extra:', montoExtra);
         
         // Solo recalcular si estamos en zona "otro" y hay productos
         if (zona === 'otro' && this.productManager && this.productManager.productos.length > 0) {
             this.productManager.recalcularViaticos();
             this.productManager.actualizarTabla();
+            this.mostrarMensajeViaticos();
+        }
+    }
+
+    // ✅ NUEVO: Método auxiliar para mostrar mensajes de viáticos
+    mostrarMensajeViaticos() {
+        const zona = document.getElementById('zonaServicio')?.value;
+        const tipoViatico = document.querySelector('input[name="tipoViatico"]:checked')?.value || 'implicito';
+        const totalProductos = this.productManager ? this.productManager.productos.filter(p => !p.esViatico).length : 0;
+        
+        let mensaje;
+        if (zona === 'cdmx') {
+            const metodo = tipoViatico === 'explicito' ? 'como producto separado' : `distribuidos entre ${totalProductos} productos`;
+            mensaje = `Viáticos de $1,000 ${metodo}`;
+        } else if (zona === 'otro') {
+            const km = document.getElementById('kilometros').value;
+            const extra = document.getElementById('montoExtra').value;
+            let detalles = [];
+            if (km) detalles.push(`${km}km`);
+            if (extra) detalles.push(`$${extra} extra`);
             
-            if (kilometros) {
-                const viaticoTotal = parseFloat(kilometros) * 20;
-                console.log(`✅ Viáticos por ${kilometros}km ($${viaticoTotal}) distribuidos entre ${this.productManager.productos.length} productos`);
+            if (detalles.length > 0) {
+                const metodo = tipoViatico === 'explicito' ? 'como producto separado' : `distribuidos entre ${totalProductos} productos`;
+                mensaje = `Viáticos por ${detalles.join(' + ')} ${metodo}`;
+            } else {
+                mensaje = 'Especifique kilómetros y/o monto extra para calcular viáticos';
             }
+        }
+        
+        if (mensaje) {
+            console.log('✅', mensaje);
         }
     }
 

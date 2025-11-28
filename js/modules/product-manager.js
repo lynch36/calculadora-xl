@@ -284,86 +284,202 @@ export class ProductManager {
 
     recalcularViaticos() {
         const zona = document.getElementById('zonaServicio')?.value;
-        console.log(`🔄 Recalculando viáticos. Zona: ${zona}, Productos: ${this.productos.length}`);
+        const tipoViatico = document.querySelector('input[name="tipoViatico"]:checked')?.value || 'implicito';
         
-        if (this.productos.length === 0) return;
+        console.log(`🔄 Recalculando viáticos. Zona: ${zona}, Tipo: ${tipoViatico}, Productos: ${this.productos.length}`);
+        
+        // Primero, remover cualquier producto de viático existente
+        this.eliminarProductoViatico();
         
         if (zona === 'cdmx') {
-            // CDMX: $1000 fijos distribuidos entre productos
-            const viaticoPorProducto = 1000 / this.productos.length;
-            console.log(`💰 Viático CDMX por producto: $${viaticoPorProducto.toFixed(2)}`);
-            
-            this.productos.forEach((producto, index) => {
-                if (!producto.precioBase) {
-                    producto.precioBase = producto.precio;
-                    console.log(`⚠️ PrecioBase faltante, usando precio actual: $${producto.precioBase}`);
-                }
-                
-                // Remover texto de viático anterior
-                producto.medidas = producto.medidas.replace(/ \(incluye \$[\d.,]+ viático.*?\)/, '');
-                
-                // Aplicar nuevo viático CDMX
-                producto.precio = producto.precioBase + viaticoPorProducto;
-                producto.medidas += ` (incluye $${viaticoPorProducto.toFixed(2)} viático CDMX)`;
-                
-                console.log(`  📦 Producto ${index + 1}: $${producto.precioBase.toFixed(2)} + $${viaticoPorProducto.toFixed(2)} = $${producto.precio.toFixed(2)}`);
-            });
-            
+            this.aplicarViaticosCDMX(tipoViatico);
         } else if (zona === 'otro') {
-            // Otro estado: viáticos por kilómetros
-            const kilometros = parseFloat(document.getElementById('kilometros')?.value) || 0;
+            this.aplicarViaticosOtroEstado(tipoViatico);
+        } else {
+            // Limpiar viáticos si no hay zona seleccionada
+            this.limpiarViaticos();
+        }
+    }
+
+    aplicarViaticosCDMX(tipoViatico) {
+        const viaticoTotal = 1000;
+        
+        if (tipoViatico === 'explicito') {
+            // PRIMERO: Limpiar viáticos de productos existentes
+            this.limpiarViaticosDeProductos();
             
-            if (kilometros > 0) {
-                const viaticoTotal = kilometros * 20;
-                const viaticoPorProducto = viaticoTotal / this.productos.length;
-                console.log(`🛣️ Viático por km: ${kilometros}km × $20 = $${viaticoTotal}, por producto: $${viaticoPorProducto.toFixed(2)}`);
+            // DESPUÉS: Agregar viáticos como producto separado
+            this.agregarProductoViatico({
+                descripcion: "Viáticos CDMX",
+                precio: viaticoTotal,
+                medidas: "Viáticos para área metropolitana",
+                esViatico: true
+            });
+            console.log(`💰 Viático explícito CDMX: $${viaticoTotal}`);
+        } else {
+            // PRIMERO: Limpiar viáticos de productos existentes
+            this.limpiarViaticosDeProductos();
+            
+            // DESPUÉS: Distribuir entre productos existentes (implícito)
+            const productosNormales = this.productos.filter(p => !p.esViatico);
+            if (productosNormales.length > 0) {
+                const viaticoPorProducto = viaticoTotal / productosNormales.length;
+                console.log(`💰 Viático implícito CDMX por producto: $${viaticoPorProducto.toFixed(2)}`);
                 
-                this.productos.forEach((producto, index) => {
-                    if (!producto.precioBase) {
-                        producto.precioBase = producto.precio;
-                        console.log(`⚠️ PrecioBase faltante, usando precio actual: $${producto.precioBase}`);
-                    }
-                    
-                    // Remover texto de viático anterior
-                    producto.medidas = producto.medidas.replace(/ \(incluye \$[\d.,]+ viático.*?\)/, '');
-                    
-                    // Aplicar nuevo viático por kilómetros
-                    producto.precio = producto.precioBase + viaticoPorProducto;
-                    producto.medidas += ` (incluye $${viaticoPorProducto.toFixed(2)} viático ${kilometros}km)`;
-                    
-                    console.log(`  📦 Producto ${index + 1}: $${producto.precioBase.toFixed(2)} + $${viaticoPorProducto.toFixed(2)} = $${producto.precio.toFixed(2)}`);
-                });
-            } else {
-                // Sin kilómetros especificados, remover viáticos
-                console.log('🚫 Sin kilómetros especificados, removiendo viáticos');
-                this.productos.forEach((producto, index) => {
-                    if (producto.precioBase) {
-                        producto.medidas = producto.medidas.replace(/ \(incluye \$[\d.,]+ viático.*?\)/, '');
-                        producto.precio = producto.precioBase;
-                        console.log(`  📦 Producto ${index + 1}: viático removido, precio: $${producto.precio.toFixed(2)}`);
-                    }
+                productosNormales.forEach((producto, index) => {
+                    this.aplicarViaticoAProducto(producto, viaticoPorProducto, 'CDMX', index);
                 });
             }
         }
     }
 
+    aplicarViaticosOtroEstado(tipoViatico) {
+        const kilometros = parseFloat(document.getElementById('kilometros')?.value) || 0;
+        const montoExtra = parseFloat(document.getElementById('montoExtra')?.value) || 0;
+        
+        if (kilometros > 0 || montoExtra > 0) {
+            const viaticoKilometros = kilometros * 20;
+            const viaticoTotal = viaticoKilometros + montoExtra;
+            
+            // Crear descripción detallada
+            let detalleDescripcion = 'Viáticos ';
+            let detalleMedidas = '';
+            if (kilometros > 0 && montoExtra > 0) {
+                detalleDescripcion += `${kilometros}km + $${montoExtra} extra`;
+                detalleMedidas = `${kilometros} kilómetros × $20 + $${montoExtra} extra = $${viaticoTotal}`;
+            } else if (kilometros > 0) {
+                detalleDescripcion += `${kilometros}km`;
+                detalleMedidas = `${kilometros} kilómetros × $20 = $${viaticoTotal}`;
+            } else {
+                detalleDescripcion += `$${montoExtra} extra`;
+                detalleMedidas = `Monto adicional: $${viaticoTotal}`;
+            }
+            
+            console.log(`🛣️ Viáticos otro estado: ${detalleMedidas}`);
+            
+            if (tipoViatico === 'explicito') {
+                // PRIMERO: Limpiar viáticos de productos existentes
+                this.limpiarViaticosDeProductos();
+                
+                // DESPUÉS: Agregar viáticos como producto separado
+                this.agregarProductoViatico({
+                    descripcion: detalleDescripcion,
+                    precio: viaticoTotal,
+                    medidas: detalleMedidas,
+                    esViatico: true
+                });
+                console.log(`💰 Viático explícito: $${viaticoTotal}`);
+            } else {
+                // PRIMERO: Limpiar viáticos de productos existentes
+                this.limpiarViaticosDeProductos();
+                
+                // DESPUÉS: Distribuir entre productos existentes (implícito)
+                const productosNormales = this.productos.filter(p => !p.esViatico);
+                if (productosNormales.length > 0) {
+                    const viaticoPorProducto = viaticoTotal / productosNormales.length;
+                    console.log(`💰 Viático implícito por producto: $${viaticoPorProducto.toFixed(2)}`);
+                    
+                    let detalleViaticoCorto;
+                    if (kilometros > 0 && montoExtra > 0) {
+                        detalleViaticoCorto = `${kilometros}km + $${montoExtra} extra`;
+                    } else if (kilometros > 0) {
+                        detalleViaticoCorto = `${kilometros}km`;
+                    } else {
+                        detalleViaticoCorto = `$${montoExtra} extra`;
+                    }
+                    
+                    productosNormales.forEach((producto, index) => {
+                        this.aplicarViaticoAProducto(producto, viaticoPorProducto, detalleViaticoCorto, index);
+                    });
+                }
+            }
+        } else {
+            // Sin viáticos, limpiar todo
+            this.limpiarViaticos();
+        }
+    }
+
+    aplicarViaticoAProducto(producto, viaticoPorProducto, detalle, index) {
+        if (!producto.precioBase) {
+            producto.precioBase = producto.precio;
+            console.log(`⚠️ PrecioBase faltante, usando precio actual: $${producto.precioBase}`);
+        }
+        
+        // Remover texto de viático anterior
+        producto.medidas = producto.medidas.replace(/ \(incluye \$[\d.,]+ viático.*?\)/, '');
+        
+        // Aplicar nuevo viático
+        producto.precio = producto.precioBase + viaticoPorProducto;
+        producto.medidas += ` (incluye $${viaticoPorProducto.toFixed(2)} viático ${detalle})`;
+        
+        console.log(`  📦 Producto ${index + 1}: $${producto.precioBase.toFixed(2)} + $${viaticoPorProducto.toFixed(2)} = $${producto.precio.toFixed(2)}`);
+    }
+
+    limpiarViaticosDeProductos() {
+        console.log('🧹 Limpiando viáticos de productos existentes...');
+        this.productos.forEach((producto, index) => {
+            if (!producto.esViatico && producto.precioBase) {
+                // Restaurar precio base y limpiar texto de viático
+                producto.medidas = producto.medidas.replace(/ \(incluye \$[\d.,]+ viático.*?\)/, '');
+                producto.precio = producto.precioBase;
+                console.log(`  🧽 Producto ${index + 1}: viático removido, precio restaurado a $${producto.precio.toFixed(2)}`);
+            }
+        });
+    }
+
+    agregarProductoViatico(viatico) {
+        // Verificar que no exista ya un producto de viático
+        this.eliminarProductoViatico();
+        
+        // Agregar el nuevo producto de viático
+        this.productos.push({
+            tipo: 'viatico',
+            descripcion: viatico.descripcion,
+            precio: viatico.precio,
+            medidas: viatico.medidas,
+            precioBase: viatico.precio,
+            esViatico: true
+        });
+        
+        console.log(`✅ Producto viático agregado: ${viatico.descripcion} = $${viatico.precio}`);
+    }
+
+    eliminarProductoViatico() {
+        const indiceViatico = this.productos.findIndex(p => p.esViatico);
+        if (indiceViatico !== -1) {
+            this.productos.splice(indiceViatico, 1);
+            console.log(`🗑️ Producto viático eliminado`);
+        }
+    }
+
     calcularPrecioConViaticos(precioBase) {
         const zona = document.getElementById('zonaServicio')?.value;
+        const tipoViatico = document.querySelector('input[name="tipoViatico"]:checked')?.value || 'implicito';
         
+        // Si es explícito, no agregar viáticos a productos individuales
+        if (tipoViatico === 'explicito') {
+            return precioBase;
+        }
+        
+        // Si es implícito, calcular como antes
         if (zona === 'cdmx') {
-            // CDMX: $1000 distribuidos entre productos
-            const totalProductosActual = this.productos.length + 1;
+            const productosNormales = this.productos.filter(p => !p.esViatico);
+            const totalProductosActual = productosNormales.length + 1;
             const viaticoPorProducto = 1000 / totalProductosActual;
-            console.log(`💰 Viático CDMX calculado: $${viaticoPorProducto.toFixed(2)} (${totalProductosActual} productos)`);
+            console.log(`💰 Viático CDMX implícito calculado: $${viaticoPorProducto.toFixed(2)} (${totalProductosActual} productos)`);
             return precioBase + viaticoPorProducto;
         } else if (zona === 'otro') {
-            // Otro estado: viáticos por kilómetros
             const kilometros = parseFloat(document.getElementById('kilometros')?.value) || 0;
-            if (kilometros > 0) {
-                const viaticoTotal = kilometros * 20;
-                const totalProductosActual = this.productos.length + 1;
+            const montoExtra = parseFloat(document.getElementById('montoExtra')?.value) || 0;
+            
+            if (kilometros > 0 || montoExtra > 0) {
+                const viaticoKilometros = kilometros * 20;
+                const viaticoTotal = viaticoKilometros + montoExtra;
+                const productosNormales = this.productos.filter(p => !p.esViatico);
+                const totalProductosActual = productosNormales.length + 1;
                 const viaticoPorProducto = viaticoTotal / totalProductosActual;
-                console.log(`🛣️ Viático km calculado: ${kilometros}km × $20 = $${viaticoTotal}, por producto: $${viaticoPorProducto.toFixed(2)}`);
+                
+                console.log(`🛣️ Viático implícito calculado: $${viaticoTotal}, por producto: $${viaticoPorProducto.toFixed(2)}`);
                 return precioBase + viaticoPorProducto;
             }
         }
@@ -526,5 +642,15 @@ export class ProductManager {
     // ✅ MÉTODO ADICIONAL: calcularSubtotal (requerido por quote-generator)
     calcularSubtotal() {
         return this.calcularTotal(); // Alias para compatibilidad
+    }
+
+    limpiarViaticos() {
+        console.log('🚫 Limpiando todos los viáticos');
+        
+        // Limpiar viáticos de productos normales
+        this.limpiarViaticosDeProductos();
+        
+        // Eliminar producto de viático si existe
+        this.eliminarProductoViatico();
     }
 }
