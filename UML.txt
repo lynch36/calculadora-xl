@@ -1,0 +1,147 @@
+classDiagram
+    class CotizacionApp {
+        -state: Object
+        -productManager: ProductManager
+        -categoryManager: CategoryManager
+        -formManager: FormManager
+        -quoteGenerator: QuoteGenerator
+        -exportManager: ExportManager
+        +constructor()
+        +setupEventListeners()
+        +handleZonaChange()
+        +handleViaticosChange()
+        +handleTipoViaticoChange()
+        +exposeGlobalFunctions()
+        +mostrarFormulario()
+        +resetearFormulario()
+        +cerrarFormulario()
+        +agregarProducto()
+        +generarCotizacion()
+        +actualizarVistaPrevia()
+        +editarCotizacion()
+        +actualizarVistaEdicion()
+        +mostrarFormularioEnEdicion()
+        +agregarProductoEnEdicion()
+        +guardarEdicion()
+        +cerrarEdicion()
+        +exportarComoMarkdown()
+    }
+
+    class ProductManager {
+        -productos: Array
+        -contadorId: number
+        +constructor()
+        +crearProducto(tipo, suffix): Object
+        +agregarProducto(producto): void
+        +eliminarProducto(index): void
+        +recalcularViaticos(): void
+        +aplicarViaticosCDMX(tipoViatico): void
+        +aplicarViaticosOtroEstado(tipoViatico): void
+        +aplicarViaticoAProducto(producto, viatico, detalle, index): void
+        +limpiarViaticosDeProductos(): void
+        +agregarProductoViatico(viatico): void
+        +eliminarProductoViatico(): void
+        +calcularPrecioConViaticos(precioBase): number
+        +actualizarListaHTML(): void
+        +actualizarTabla(): void
+        +actualizarTotales(): void
+        +actualizarTotalesBasico(): void
+        +calcularTotal(): number
+        +calcularSubtotal(): number
+        +limpiarFormulario(esEdicion): void
+        +limpiarViaticos(): void
+        +obtenerProductos(): Array
+        +actualizarDescripcionProducto(index, valor): void
+        +actualizarPrecioProducto(index, valor): void
+        +calcularPrecioFinal(precioBase): number
+    }
+
+    class CategoryManager {
+        -categorias: Object
+        +constructor()
+        +actualizarSubcategorias(categoria, esEdicion, formManager): void
+        +setupEventListeners(formManager): void
+        +limpiarSelecciones(esEdicion): void
+        +obtenerCategoriaPorTipo(tipo): string
+    }
+
+    class FormManager {
+        +mostrarFormulario(): void
+        +cerrarFormulario(): void
+        +ocultarTodosLosCampos(esEdicion): void
+        +mostrarCamposEspecificos(tipo, esEdicion): void
+    }
+
+    class QuoteGenerator {
+        -productManager: ProductManager
+        +constructor()
+        +setProductManager(productManager): void
+        +generarVistaPrevia(productos, cliente, requiereFactura, requiereInstalacion, especificaciones): string
+        +generar(productos, cliente, opciones): void
+        +actualizarTotales(): void
+    }
+
+    class ExportManager {
+        +exportarPDF(): void
+        +exportarMarkdown(): void
+    }
+
+    class Calculations {
+        +calcularIVA(subtotal): number
+        +sumaArea(base, altura, precio): number
+        +sumaAltura(altura, precio): number
+        +multiplicacionArea(base, altura, precio): number
+    }
+
+    class Helpers {
+        +mostrarMensaje(mensaje, tipo): void
+        +formatearNumero(numero): string
+    }
+
+    class Producto {
+        +tipo: string
+        +descripcion: string
+        +precio: number
+        +precioBase: number
+        +medidas: string
+        +esViatico: boolean
+    }
+
+    class Cotizacion {
+        +cliente: string
+        +fecha: string
+        +productos: Array~Producto~
+        +requiereFactura: boolean
+        +requiereInstalacion: boolean
+        +especificaciones: string
+    }
+
+    %% Relaciones de composición y agregación
+    CotizacionApp *-- ProductManager
+    CotizacionApp *-- CategoryManager
+    CotizacionApp *-- FormManager
+    CotizacionApp *-- QuoteGenerator
+    CotizacionApp *-- ExportManager
+
+    %% Dependencias
+    ProductManager ..> Calculations
+    ProductManager ..> Helpers
+    QuoteGenerator ..> Calculations
+    CategoryManager ..> FormManager
+
+    %% Relaciones de datos
+    ProductManager o-- Producto
+    CotizacionApp o-- Cotizacion
+    Cotizacion *-- Producto
+
+    %% Configuración bidireccional
+    QuoteGenerator --> ProductManager : setProductManager()
+    CategoryManager --> FormManager : setupEventListeners()
+
+    %% Herencia/Interfaz (si existiera)
+    note for CotizacionApp "Controlador principal\nPatrón Facade"
+    note for ProductManager "Maneja productos y viáticos\nPatrón Repository"
+    note for CategoryManager "Maneja categorización\nPatrón Strategy"
+    note for FormManager "Maneja UI de formularios\nPatrón Observer"
+    note for QuoteGenerator "Genera cotizaciones\nPatrón Factory"
+    note for ExportManager "Exporta documentos\nPatrón Command"
