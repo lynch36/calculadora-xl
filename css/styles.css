@@ -156,6 +156,11 @@ button {
     align-items: center;
     padding: 8px;
     border-bottom: 1px solid #eee;
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: white;
 }
 
 .producto-item:last-child {
@@ -246,6 +251,16 @@ button {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+}
+
+.edicion-producto label {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 0.9em;
 }
 
 .input-descripcion {

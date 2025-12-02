@@ -227,6 +227,13 @@
         <small class="help-text">Precio manual para producto personalizado</small>
     </div>
 
+    <!-- ✅ NUEVO: Campo de descripción personalizada para todos los productos -->
+    <div class="form-group" style="margin-top: 15px;">
+        <label for="descripcionPersonalizada">Descripción personalizada (opcional):</label>
+        <input type="text" id="descripcionPersonalizada" placeholder="Ej: Logo empresarial, diseño especial...">
+        <small class="help-text">Descripción adicional que se agregará al nombre del producto</small>
+    </div>
+
     <button type="button" onclick="agregarProducto()" class="btn-secondary">Agregar Producto</button>
   </div>
 
@@ -356,56 +363,52 @@
 
             <!-- Campos específicos para Letras 3D -->
             <div id="opcionesLetras3DEdit" class="form-group opciones-especificas" style="display:none;">
-                <label for="altura3DEdit">Altura para cotización (cm):</label>
-                <input type="number" id="altura3DEdit" placeholder="Altura usada en el cálculo">
+                <label for="altura3DEdicion">Altura para cotización (cm):</label>
+                <input type="number" id="altura3DEdicion" placeholder="Altura usada en el cálculo">
                 
-                <label for="material3DEdit">Material:</label>
-                <select id="material3DEdit" required>
+                <label for="material3DEdicion">Material:</label>
+                <select id="material3DEdicion" required>
                     <option value="">Seleccione material</option>
                     <option value="1">Acrílico con luz</option>
                     <option value="2">Aluminio con luz</option>
                     <option value="3">Acrílico sin luz</option>
                     <option value="4">Aluminio sin luz</option>
                 </select>
-                <label for="altura3DEdit">Altura para cotización (cm):</label>
-                <input type="number" id="altura3DEdit" min="1" required>
                 
                 <!-- CAMPOS AHORA OBLIGATORIOS -->
                 <div class="campos-informativos" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd;">
-                    <label for="base3DEdit">Base (cm): *</label>
-                    <input type="number" id="base3DEdit" min="1" required>
-                    <label for="alturaInfo3DEdit">Altura real (cm): *</label>
-                    <input type="number" id="alturaInfo3DEdit" min="1" required>
+                    <label for="base3DEdicion">Base (cm): *</label>
+                    <input type="number" id="base3DEdicion" min="1" required>
+                    <label for="alturaInfo3DEdicion">Altura real (cm): *</label>
+                    <input type="number" id="alturaInfo3DEdicion" min="1" required>
                 </div>
             </div>
 
             <!-- Campos específicos para Letras Planas -->
             <div id="opcionesLetrasPlanasEdit" class="form-group opciones-especificas" style="display:none;">
-                <label for="alturaPlanasEditar">Altura para cotización (cm):</label>
-                <input type="number" id="alturaPlanasEditar" placeholder="Altura usada en el cálculo">
+                <label for="alturaPlanasEdicion">Altura para cotización (cm):</label>
+                <input type="number" id="alturaPlanasEdicion" placeholder="Altura usada en el cálculo">
                 
-                <label for="materialPlanasEditar">Material:</label>
-                <select id="materialPlanasEditar" required>
+                <label for="materialPlanasEdicion">Material:</label>
+                <select id="materialPlanasEdicion" required>
                     <option value="">Seleccione material</option>
                     <option value="1">Acrílico</option>
                     <option value="2">Aluminio</option>
                 </select>
-                <label for="alturaPlanasEditar">Altura para cotización (cm):</label>
-                <input type="number" id="alturaPlanasEditar" min="1" required>
                 
                 <!-- CAMPOS AHORA OBLIGATORIOS -->
                 <div class="campos-informativos" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd;">
-                    <label for="basePlanasEditar">Base (cm): *</label>
-                    <input type="number" id="basePlanasEditar" min="1" required>
-                    <label for="alturaInfoPlanasEditar">Altura real (cm): *</label>
-                    <input type="number" id="alturaInfoPlanasEditar" min="1" required>
+                    <label for="basePlanasEdicion">Base (cm): *</label>
+                    <input type="number" id="basePlanasEdicion" min="1" required>
+                    <label for="alturaInfoPlanasEdicion">Altura real (cm): *</label>
+                    <input type="number" id="alturaInfoPlanasEdicion" min="1" required>
                 </div>
             </div>
 
             <!-- Campos específicos para Banner -->
             <div id="opcionesBannerEdit" class="form-group opciones-especificas" style="display:none;">
-                <label for="calidadBannerEdit">Calidad del Banner:</label>
-                <select id="calidadBannerEdit">
+                <label for="calidadBannerEdicion">Calidad del Banner:</label>
+                <select id="calidadBannerEdicion">
                     <option value="">Seleccione calidad...</option>
                     <option value="1">720 DPI ($800/m²)</option>
                     <option value="2">Alta Calidad ($900/m²)</option>
@@ -415,8 +418,8 @@
 
             <!-- Campos específicos para Caja Circular -->
             <div id="opcionesCircularEdit" class="form-group opciones-especificas" style="display:none;">
-                <label for="areaCircularEditar">Área Circular (cm²):</label>
-                <input type="number" id="areaCircularEditar" placeholder="Ej: 500">
+                <label for="areaCircularEdicion">Área Circular (cm²):</label>
+                <input type="number" id="areaCircularEdicion" placeholder="Ej: 500">
             </div>
 
             <!-- Campos específicos para Caja de Doble Vista -->
@@ -434,6 +437,13 @@
                 <input type="text" id="descripcionOtroEdit">
                 <label for="costoOtroEdit">Costo:</label>
                 <input type="number" id="costoOtroEdit" min="0">
+            </div>
+
+            <!-- ✅ NUEVO: Campo de descripción personalizada para edición -->
+            <div class="form-group" style="margin-top: 15px;">
+                <label for="descripcionPersonalizadaEdicion">Descripción personalizada (opcional):</label>
+                <input type="text" id="descripcionPersonalizadaEdicion" placeholder="Ej: Logo empresarial, diseño especial...">
+                <small class="help-text">Descripción adicional que se agregará al nombre del producto</small>
             </div>
 
             <button type="button" onclick="agregarProductoEnEdicion()" class="btn-secondary">

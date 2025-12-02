@@ -67,7 +67,7 @@ export class ProductManager {
                     Helpers.mostrarMensaje("Ingrese las medidas", "error");
                     return null;
                 }
-                const calidadLona = document.getElementById(`calidadLona${suffix === 'Editar' ? 'Editar' : ''}`)?.value;
+                const calidadLona = document.getElementById(`calidadLona${suffix === 'Edicion' ? 'Edicion' : ''}`)?.value; // ✅ CORREGIDO
                 if (!calidadLona) {
                     Helpers.mostrarMensaje("Seleccione la calidad de lona", "error");
                     return null;
@@ -83,7 +83,7 @@ export class ProductManager {
                     Helpers.mostrarMensaje("Ingrese las medidas", "error");
                     return null;
                 }
-                const calidadVinil = document.getElementById(suffix === 'Editar' ? 'calidadVinilEditar' : 'calidadVinil')?.value;
+                const calidadVinil = document.getElementById(suffix === 'Edicion' ? 'calidadVinilEdicion' : 'calidadVinil')?.value; // ✅ CORREGIDO
                 if (!calidadVinil) {
                     Helpers.mostrarMensaje("Seleccione la calidad del vinil", "error");
                     return null;
@@ -95,12 +95,12 @@ export class ProductManager {
                 break;
 
             case "6": // Letras 3D - TUS PRECIOS ORIGINALES
-                const altura3D = parseFloat(document.getElementById(suffix === 'Editar' ? 'altura3DEditar' : 'altura3D')?.value);
-                const material3D = document.getElementById(suffix === 'Editar' ? 'material3DEditar' : 'material3D')?.value;
+                const altura3D = parseFloat(document.getElementById(suffix === 'Edicion' ? 'altura3DEdicion' : 'altura3D')?.value); // ✅ CORREGIDO
+                const material3D = document.getElementById(suffix === 'Edicion' ? 'material3DEdicion' : 'material3D')?.value; // ✅ CORREGIDO
 
                 // CAMPOS INFORMATIVOS AHORA OBLIGATORIOS
-                const base3D = parseFloat(document.getElementById(suffix === 'Editar' ? 'base3DEditar' : 'base3D')?.value);
-                const alturaInfo3D = parseFloat(document.getElementById(suffix === 'Editar' ? 'alturaInfo3DEditar' : 'alturaInfo3D')?.value);
+                const base3D = parseFloat(document.getElementById(suffix === 'Edicion' ? 'base3DEdicion' : 'base3D')?.value); // ✅ CORREGIDO
+                const alturaInfo3D = parseFloat(document.getElementById(suffix === 'Edicion' ? 'alturaInfo3DEdicion' : 'alturaInfo3D')?.value); // ✅ CORREGIDO
 
                 // VALIDACIONES - Todos los campos obligatorios
                 if (!altura3D) {
@@ -131,12 +131,12 @@ export class ProductManager {
                 break;
 
             case "7": // Letras Planas - TUS PRECIOS ORIGINALES
-                const alturaPlanas = parseFloat(document.getElementById(suffix === 'Editar' ? 'alturaPlanasEditar' : 'alturaPlanas')?.value);
-                const materialPlanas = document.getElementById(suffix === 'Editar' ? 'materialPlanasEditar' : 'materialPlanas')?.value;
+                const alturaPlanas = parseFloat(document.getElementById(suffix === 'Edicion' ? 'alturaPlanasEdicion' : 'alturaPlanas')?.value); // ✅ CORREGIDO
+                const materialPlanas = document.getElementById(suffix === 'Edicion' ? 'materialPlanasEdicion' : 'materialPlanas')?.value; // ✅ CORREGIDO
                 
                 // CAMPOS INFORMATIVOS AHORA OBLIGATORIOS
-                const basePlanas = parseFloat(document.getElementById(suffix === 'Editar' ? 'basePlanasEditar' : 'basePlanas')?.value);
-                const alturaInfoPlanas = parseFloat(document.getElementById(suffix === 'Editar' ? 'alturaInfoPlanasEditar' : 'alturaInfoPlanas')?.value);
+                const basePlanas = parseFloat(document.getElementById(suffix === 'Edicion' ? 'basePlanasEdicion' : 'basePlanas')?.value); // ✅ CORREGIDO
+                const alturaInfoPlanas = parseFloat(document.getElementById(suffix === 'Edicion' ? 'alturaInfoPlanasEdicion' : 'alturaInfoPlanas')?.value); // ✅ CORREGIDO
                 
                 // VALIDACIONES - Todos los campos obligatorios
                 if (!alturaPlanas) {
@@ -171,7 +171,7 @@ export class ProductManager {
                     Helpers.mostrarMensaje("Ingrese las medidas", "error");
                     return null;
                 }
-                const calidadBanner = document.getElementById(suffix === 'Editar' ? 'calidadBannerEditar' : 'calidadBanner')?.value;
+                const calidadBanner = document.getElementById(suffix === 'Edicion' ? 'calidadBannerEdicion' : 'calidadBanner')?.value; // ✅ CORREGIDO
                 if (!calidadBanner) {
                     Helpers.mostrarMensaje("Seleccione la calidad del banner", "error");
                     return null;
@@ -183,7 +183,7 @@ export class ProductManager {
                 break;
 
             case "9": // Caja Circular - TU PRECIO ORIGINAL
-                const areaCircular = parseFloat(document.getElementById(`areaCircular${suffix === 'Editar' ? 'Editar' : ''}`)?.value);
+                const areaCircular = parseFloat(document.getElementById(`areaCircular${suffix === 'Edicion' ? 'Edicion' : ''}`)?.value); // ✅ CORREGIDO
                 if (!areaCircular) {
                     Helpers.mostrarMensaje("Ingrese el área", "error");
                     return null;
@@ -241,6 +241,17 @@ export class ProductManager {
             producto.precioBase = producto.precio;
             console.log(`💾 Precio base guardado: $${producto.precioBase} para ${producto.descripcion}`);
             
+            // ✅ NUEVO: Agregar descripción personalizada si existe
+            const descripcionPersonalizada = document.getElementById(`descripcionPersonalizada${suffix === 'Edicion' ? 'Edicion' : ''}`)?.value;
+            if (descripcionPersonalizada && descripcionPersonalizada.trim()) {
+                producto.descripcionPersonalizada = descripcionPersonalizada.trim();
+                // Combinar descripción base con personalizada
+                producto.descripcionCompleta = `${producto.descripcion} - ${producto.descripcionPersonalizada}`;
+                console.log(`📝 Descripción personalizada agregada: ${producto.descripcionPersonalizada}`);
+            } else {
+                producto.descripcionCompleta = producto.descripcion;
+            }
+            
             // Calcular precio con viáticos
             const precioConViaticos = this.calcularPrecioConViaticos(producto.precio);
             const viaticoPorProducto = precioConViaticos - producto.precio;
@@ -254,7 +265,7 @@ export class ProductManager {
                 console.log(`💰 Viático agregado: +$${viaticoPorProducto.toFixed(2)}`);
             }
             
-            console.log(`✅ Producto final: ${producto.descripcion} = $${producto.precio}`);
+            console.log(`✅ Producto final: ${producto.descripcionCompleta} = $${producto.precio}`);
         }
 
         return producto;
@@ -477,7 +488,7 @@ export class ProductManager {
                 const viaticoTotal = viaticoKilometros + montoExtra;
                 const productosNormales = this.productos.filter(p => !p.esViatico);
                 const totalProductosActual = productosNormales.length + 1;
-                const viaticoPorProducto = viaticoTotal / totalProductosActual;
+                const viaticoPorProducto = viaticoTotal / totalProductosNormales.length;
                 
                 console.log(`🛣️ Viático implícito calculado: $${viaticoTotal}, por producto: $${viaticoPorProducto.toFixed(2)}`);
                 return precioBase + viaticoPorProducto;
@@ -498,10 +509,13 @@ export class ProductManager {
 
         let html = '<div class="productos-agregados">';
         this.productos.forEach((producto, index) => {
+            // ✅ ACTUALIZADO: Usar descripcionCompleta en lugar de descripcion
+            const descripcionMostrar = producto.descripcionCompleta || producto.descripcion;
+            
             html += `
                 <div class="producto-item">
                     <div class="producto-info">
-                        <strong>${producto.descripcion}</strong><br>
+                        <strong>${descripcionMostrar}</strong><br>
                         ${producto.medidas ? `<span class="medidas">${producto.medidas}</span><br>` : ''}
                         <span class="precio">$${Helpers.formatearNumero(producto.precio.toFixed(2))} MXN</span>
                     </div>
@@ -524,18 +538,16 @@ export class ProductManager {
     }
 
     limpiarFormulario(esEdicion = false) {
-        const suffix = esEdicion ? 'Editar' : '';
+        const suffix = esEdicion ? 'Edicion' : ''; // ✅ CORREGIDO: cambiar 'Editar' por 'Edicion'
         
-        // ❌ PROBLEMA: Esto limpia TODO (incluyendo cliente y zona)
-        // const inputs = document.querySelectorAll(`input${suffix ? `[id$="${suffix}"]` : ':not([id*="Editar"])'}`);
-        
-        // ✅ SOLUCIÓN: Solo limpiar campos específicos de productos
+        // ✅ ACTUALIZADO: Solo limpiar campos específicos de productos
         const camposProducto = [
             'base', 'altura', 'grosor', 'cantidad', 'cantidadPlanas',
             'descripcionOtro', 'costoOtro', 'diametroCircular',
             'baseDobleVista', 'alturaDobleVista', 'areaCircular',
             'altura3D', 'base3D', 'alturaInfo3D', 'alturaPlanas', 
-            'basePlanas', 'alturaInfoPlanas'
+            'basePlanas', 'alturaInfoPlanas', 
+            'descripcionPersonalizada' // ✅ NUEVO CAMPO
         ];
         
         camposProducto.forEach(campo => {
@@ -581,6 +593,23 @@ export class ProductManager {
         if (this.productos[index]) {
             this.productos[index].precio = parseFloat(valor);
             Helpers.mostrarMensaje("Precio actualizado", "success");
+        }
+    }
+
+    actualizarComentarioProducto(index, valor) {
+        if (this.productos[index]) {
+            // Actualizar descripción personalizada
+            this.productos[index].descripcionPersonalizada = valor.trim();
+            
+            // Reconstruir descripción completa
+            if (valor.trim()) {
+                this.productos[index].descripcionCompleta = `${this.productos[index].descripcion} - ${valor.trim()}`;
+            } else {
+                this.productos[index].descripcionCompleta = this.productos[index].descripcion;
+            }
+            
+            console.log(`📝 Comentario actualizado: ${valor.trim()}`);
+            Helpers.mostrarMensaje("Comentario actualizado", "success");
         }
     }
 
@@ -644,6 +673,7 @@ export class ProductManager {
         return this.calcularTotal(); // Alias para compatibilidad
     }
 
+    // ✅ MÉTODO ACTUALIZADO: Limpiar todo (productos + eliminar producto viático)
     limpiarViaticos() {
         console.log('🚫 Limpiando todos los viáticos');
         

@@ -16,7 +16,7 @@ class CotizacionApp {
         this.categoryManager = new CategoryManager();
         this.formManager = new FormManager();
         this.quoteGenerator = new QuoteGenerator();
-        this.exportManager = new ExportManager();
+        this.exportManager = new ExportManager(this.quoteGenerator);
         
         // 2. Configurar relaciones
         this.categoryManager.setupEventListeners(this.formManager);
@@ -255,6 +255,11 @@ class CotizacionApp {
             }
         };
 
+        // NUEVO - Exponer método para actualizar comentarios de productos
+        window.actualizarComentarioProducto = (index, valor) => {
+            this.actualizarComentarioProducto(index, valor);
+        };
+
         console.log('Funciones globales expuestas');
     }
 
@@ -447,23 +452,40 @@ class CotizacionApp {
             const item = document.createElement('div');
             item.className = 'producto-item';
             
+            // ✅ NUEVO: Separar descripción base de personalizada
+            const descripcionBase = producto.descripcion;
+            const descripcionPersonalizada = producto.descripcionPersonalizada || '';
+            
             item.innerHTML = `
                 <div style="flex: 2;">
                     <div class="edicion-producto">
-                        <input type="text" 
-                            value="${producto.descripcion}" 
-                            onchange="actualizarDescripcionProducto(${index}, this.value)"
-                            class="input-descripcion" 
-                            style="width: 100%; margin-bottom: 5px;">
-                        <div class="medidas-texto">${producto.medidas || ''}</div>
+                        <div style="margin-bottom: 10px;">
+                            <label style="font-weight: bold; color: #333;">Producto:</label>
+                            <div style="color: #666; font-size: 0.9em;">${descripcionBase}</div>
+                        </div>
+                        
+                        <div style="margin-bottom: 10px;">
+                            <label style="font-weight: bold; color: #333;">Comentario/Descripción personalizada:</label>
+                            <input type="text" 
+                                value="${descripcionPersonalizada}" 
+                                onchange="actualizarComentarioProducto(${index}, this.value)"
+                                class="input-comentario" 
+                                placeholder="Ej: Logo empresarial, diseño especial..."
+                                style="width: 100%; margin-top: 5px; padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
+                        
+                        <div class="medidas-texto" style="color: #666; font-size: 0.85em; margin-bottom: 10px;">
+                            ${producto.medidas || ''}
+                        </div>
+                        
                         <div class="precio-edicion" style="margin-top: 5px;">
-                            <label>Precio: $</label>
+                            <label style="font-weight: bold;">Precio: $</label>
                             <input type="number" 
                                 value="${producto.precio}" 
                                 onchange="actualizarPrecioProducto(${index}, this.value)"
                                 min="0" 
                                 step="0.01"
-                                style="width: 100px;">
+                                style="width: 100px; padding: 4px; border: 1px solid #ddd; border-radius: 4px;">
                             MXN
                         </div>
                     </div>
@@ -576,6 +598,30 @@ class CotizacionApp {
 
         // Exportar
         this.exportManager.exportarMarkdown();
+    }
+
+    // ✅ NUEVO: Método para actualizar comentarios de productos
+    actualizarComentarioProducto(index, valor) {
+        const productos = this.productManager.obtenerProductos();
+        if (productos[index]) {
+            // Actualizar descripción personalizada
+            productos[index].descripcionPersonalizada = valor.trim();
+            
+            // Reconstruir descripción completa
+            if (valor.trim()) {
+                productos[index].descripcionCompleta = `${productos[index].descripcion} - ${valor.trim()}`;
+            } else {
+                productos[index].descripcionCompleta = productos[index].descripcion;
+            }
+            
+            console.log(`📝 Comentario actualizado para producto ${index + 1}:`, valor.trim());
+            
+            // Actualizar vista previa inmediatamente
+            this.actualizarVistaPrevia();
+            
+            // Actualizar tabla de productos
+            this.productManager.actualizarTabla();
+        }
     }
 }
 

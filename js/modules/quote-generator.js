@@ -16,6 +16,12 @@ export class QuoteGenerator {
         return this.cotizacion;
     }
 
+    // ✅ NUEVO: Método para limpiar texto de viáticos de las medidas
+    limpiarViaticosDeMedidas(medidas) {
+        if (!medidas) return '';
+        return medidas.replace(/ \(incluye \$[\d.,]+ viático.*?\)/, '');
+    }
+
     // Tu función original de vista previa - SIN COBRAR INSTALACIÓN
     generarVistaPrevia(productos, cliente, requiereFactura, requiereInstalacion, especificaciones = '') {
         if (!cliente || productos.length === 0) return '';
@@ -26,9 +32,11 @@ export class QuoteGenerator {
 
         let subtotal = 0;
         productos.forEach((producto, index) => {
-            texto += `${index + 1}. ${producto.descripcion}\n`;
+            // ✅ ACTUALIZADO: Usar descripcionCompleta si existe
+            const descripcionMostrar = producto.descripcionCompleta || producto.descripcion;
+            texto += `${index + 1}. ${descripcionMostrar}\n`;
             if (producto.medidas) {
-                texto += `   ${producto.medidas}\n`;
+                texto += `   Medidas: ${producto.medidas}\n`;
             }
             texto += `   Precio: $${Helpers.formatearNumero(producto.precio.toFixed(2))} MXN\n\n`;
             subtotal += producto.precio;
@@ -59,22 +67,52 @@ export class QuoteGenerator {
         return texto;
     }
 
-    // Tu función original de Markdown - SIN COBRAR INSTALACIÓN
+    // ✅ CORREGIDO: Función de Markdown con precios reales (sin texto de viáticos)
     generarContenidoMarkdown() {
-        if (!this.cotizacion || !this.cotizacion.productos.length) {
+        console.log('🔍 Depurando exportación Markdown...');
+        console.log('📋 Cotización:', this.cotizacion);
+        
+        if (!this.cotizacion) {
+            console.log('❌ No hay cotización');
             return null;
         }
+        
+        if (!this.cotizacion.productos || !this.cotizacion.productos.length) {
+            console.log('❌ No hay productos en la cotización');
+            return null;
+        }
+        
+        console.log('📦 Productos totales:', this.cotizacion.productos.length);
 
         let subtotal = 0;
         let productosTexto = '';
-        this.cotizacion.productos.forEach((producto, index) => {
-            productosTexto += `${index + 1}. **${producto.descripcion}**\n`;
+        
+        // Filtrar productos que no sean viáticos explícitos
+        const productosParaExportar = this.cotizacion.productos.filter(producto => !producto.esViatico);
+        console.log('📤 Productos para exportar:', productosParaExportar.length);
+        
+        productosParaExportar.forEach((producto, index) => {
+            console.log(`  📦 Producto ${index + 1}:`, producto);
+            
+            // ✅ ACTUALIZADO: Usar descripcionCompleta si existe
+            const descripcionMostrar = producto.descripcionCompleta || producto.descripcion;
+            productosTexto += `${index + 1}. **${descripcionMostrar}**\n`;
+            
             if (producto.medidas) {
-                productosTexto += `   - Medidas: ${producto.medidas}\n`;
+                // ✅ CORREGIDO: Limpiar texto de viáticos pero mantener las medidas originales
+                const medidasLimpias = this.limpiarViaticosDeMedidas(producto.medidas);
+                if (medidasLimpias.trim()) {
+                    productosTexto += `   - Medidas: ${medidasLimpias}\n`;
+                }
             }
-            productosTexto += `   - Precio: $${Helpers.formatearNumero(parseFloat(producto.precio).toFixed(2))} MXN\n\n`;
-            subtotal += parseFloat(producto.precio);
+            
+            // ✅ CORREGIDO: Usar el precio real actual (que incluye viáticos distribuidos)
+            const precioReal = producto.precio;
+            productosTexto += `   - Precio: $${Helpers.formatearNumero(precioReal.toFixed(2))} MXN\n\n`;
+            subtotal += precioReal;
         });
+
+        console.log('💰 Subtotal calculado:', subtotal);
 
         // TU LÓGICA ORIGINAL - Solo IVA si se requiere factura
         const iva = this.cotizacion.opciones.requiereFactura ? Calculations.calcularIVA(subtotal) : 0;
@@ -125,6 +163,7 @@ ${productosTexto}
 ${this.cotizacion.opciones.especificaciones}`;
         }
 
+        console.log('✅ Contenido Markdown generado exitosamente');
         return contenido;
     }
 
