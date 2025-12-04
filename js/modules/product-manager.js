@@ -293,6 +293,34 @@ export class ProductManager {
         this.actualizarTotales();
     }
 
+    // ✅ CORREGIDO: Método para determinar si se deben aplicar viáticos
+    debeAplicarViaticos() {
+        const zona = document.getElementById('zonaServicio')?.value;
+        
+        // Obtener estado de instalación
+        let requiereInstalacion = false;
+        if (window.app && window.app.state && window.app.state.cotizacion) {
+            requiereInstalacion = window.app.state.cotizacion.requiereInstalacion;
+        } else {
+            const instalacionCheckbox = document.getElementById('requiereInstalacion');
+            if (instalacionCheckbox) {
+                requiereInstalacion = instalacionCheckbox.checked;
+            }
+            
+            const editarInstalacionCheckbox = document.getElementById('editarInstalacion');
+            if (editarInstalacionCheckbox) {
+                requiereInstalacion = editarInstalacionCheckbox.checked;
+            }
+        }
+        
+        console.log(`🔍 Evaluando viáticos - Zona: ${zona}, Instalación: ${requiereInstalacion}`);
+        
+        // Viáticos automáticos ($1,000) se aplican si:
+        // 1. La zona es CDMX (siempre)
+        // 2. O se requiere instalación (independiente de zona)
+        return zona === 'cdmx' || requiereInstalacion;
+    }
+
     recalcularViaticos() {
         const zona = document.getElementById('zonaServicio')?.value;
         const tipoViatico = document.querySelector('input[name="tipoViatico"]:checked')?.value || 'implicito';
@@ -302,12 +330,20 @@ export class ProductManager {
         // Primero, remover cualquier producto de viático existente
         this.eliminarProductoViatico();
         
-        if (zona === 'cdmx') {
-            this.aplicarViaticosCDMX(tipoViatico);
+        // ✅ CORREGIDO: Lógica actualizada
+        if (this.debeAplicarViaticos()) {
+            // Aplicar viáticos fijos de $1,000 (CDMX o instalación)
+            if (zona === 'cdmx') {
+                this.aplicarViaticosCDMX(tipoViatico);
+            } else {
+                // Si no es CDMX pero requiere instalación
+                this.aplicarViaticosInstalacion(tipoViatico);
+            }
         } else if (zona === 'otro') {
+            // Para otros estados SIN instalación: solo si hay km/monto extra
             this.aplicarViaticosOtroEstado(tipoViatico);
         } else {
-            // Limpiar viáticos si no hay zona seleccionada
+            // Limpiar viáticos si no se requieren
             this.limpiarViaticos();
         }
     }
@@ -407,6 +443,39 @@ export class ProductManager {
         } else {
             // Sin viáticos, limpiar todo
             this.limpiarViaticos();
+        }
+    }
+
+    // ✅ NUEVO: Método para aplicar viáticos por instalación (cuando no es CDMX)
+    aplicarViaticosInstalacion(tipoViatico) {
+        const viaticoTotal = 1000; // Mismo monto que CDMX
+        
+        if (tipoViatico === 'explicito') {
+            // PRIMERO: Limpiar viáticos de productos existentes
+            this.limpiarViaticosDeProductos();
+            
+            // DESPUÉS: Agregar viáticos como producto separado
+            this.agregarProductoViatico({
+                descripcion: "Viáticos por instalación",
+                precio: viaticoTotal,
+                medidas: "Viáticos incluidos por servicio de instalación",
+                esViatico: true
+            });
+            console.log(`💰 Viático explícito por instalación: $${viaticoTotal}`);
+        } else {
+            // PRIMERO: Limpiar viáticos de productos existentes
+            this.limpiarViaticosDeProductos();
+            
+            // DESPUÉS: Distribuir entre productos existentes (implícito)
+            const productosNormales = this.productos.filter(p => !p.esViatico);
+            if (productosNormales.length > 0) {
+                const viaticoPorProducto = viaticoTotal / productosNormales.length;
+                console.log(`💰 Viático implícito por instalación: $${viaticoPorProducto.toFixed(2)} por producto`);
+                
+                productosNormales.forEach((producto, index) => {
+                    this.aplicarViaticoAProducto(producto, viaticoPorProducto, 'instalación', index);
+                });
+            }
         }
     }
 

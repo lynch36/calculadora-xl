@@ -313,6 +313,129 @@ button {
     content: "✈️ ";
 }
 
+/* ✅ NUEVO: Estilos para pasos del formulario */
+.paso-instalacion {
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.paso-instalacion h3 {
+    color: #495057;
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+.pregunta-principal {
+    font-size: 16px;
+    font-weight: 600;
+    color: #343a40;
+    margin-bottom: 15px;
+    display: block;
+}
+
+.opciones-instalacion {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.opcion-radio {
+    display: flex;
+    align-items: flex-start;
+    padding: 15px;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.opcion-radio:hover {
+    border-color: #80bdff;
+    background: #f8f9fa;
+}
+
+.opcion-radio input[type="radio"] {
+    margin: 0;
+    margin-right: 12px;
+    transform: scale(1.2);
+}
+
+.opcion-radio input[type="radio"]:checked {
+    accent-color: #007bff;
+}
+
+.opcion-radio:has(input:checked) {
+    border-color: #007bff;
+    background: #e3f2fd;
+}
+
+.opcion-texto strong {
+    display: block;
+    color: #495057;
+    margin-bottom: 4px;
+}
+
+.opcion-texto small {
+    color: #6c757d;
+    font-size: 13px;
+}
+
+.info-instalacion {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.info-instalacion p {
+    margin: 0 0 10px 0;
+    color: #155724;
+}
+
+.checkboxes-finales {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+#configuracionZona, #restoFormulario {
+    margin-top: 20px;
+}
+
+#configuracionZona h3, #restoFormulario h3 {
+    color: #495057;
+    font-size: 18px;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 8px;
+}
+
+/* ✅ CSS LIMPIO Y DEFINITIVO PARA FORMULARIO DE EDICIÓN */
+#editarForm {
+    display: none;
+}
+
+/* Formulario dinámico siempre visible */
+#editarFormDinamico {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 10000 !important;
+}
+
+/* Modo edición - ocultar elementos principales */
+body.editing-mode #cotizacionForm,
+body.editing-mode #vistaPrevia,
+body.editing-mode .button-group,
+body.editing-mode #mensajes {
+    display: none !important;
+}
+
 @media (max-width: 768px) {
     .container {
         padding: 10px;

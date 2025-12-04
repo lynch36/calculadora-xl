@@ -32,18 +32,49 @@
     <input type="text" id="clienteNombre" required>
   </div>
 
-  <!-- NUEVO campo zona -->
-  <div class="form-group">
-    <label for="zonaServicio">Zona de servicio:</label>
-    <select id="zonaServicio">
-        <option value="cdmx">Área Metropolitana/CDMX (+$1,000 viáticos)</option>
-        <option value="otro">Otro Estado (viáticos por km)</option>
-    </select>
-    <small class="help-text">Los viáticos se distribuyen automáticamente entre productos</small>
+  <!-- ✅ PASO 1 - Pregunta sobre instalación -->
+  <div class="form-group paso-instalacion">
+    <h3>🔧 Paso 1: Tipo de Servicio</h3>
+    <label class="pregunta-principal">¿Este proyecto requiere instalación?</label>
+    
+    <div class="opciones-instalacion">
+      <label class="opcion-radio">
+        <input type="radio" name="tipoServicio" value="conInstalacion" id="radioConInstalacion">
+        <span class="radio-custom"></span>
+        <div class="opcion-texto">
+          <strong>✅ Sí, incluye instalación</strong>
+          <small>Requiere selección de zona para calcular viáticos</small>
+        </div>
+      </label>
+      
+      <label class="opcion-radio">
+        <input type="radio" name="tipoServicio" value="soloFabricacion" id="radioSoloFabricacion">
+        <span class="radio-custom"></span>
+        <div class="opcion-texto">
+          <strong>📦 Solo fabricación</strong>
+          <small>Sin viáticos - No requiere zona</small>
+        </div>
+      </label>
+    </div>
   </div>
 
-  <!-- ✅ ACTUALIZADO: Campos para viáticos en otros estados -->
+  <!-- ✅ PASO 2: Solo aparece cuando HAY instalación -->
+  <div id="configuracionZona" class="form-group" style="display:none;">
+    <h3>🌍 Paso 2: Zona de Instalación</h3>
+    <p>Seleccione la zona donde se realizará la instalación:</p>
+    
+    <label for="zonaServicio">Zona de instalación:</label>
+    <select id="zonaServicio">
+        <option value="">Seleccionar zona...</option>
+        <option value="cdmx">CDMX / Zona Metropolitana ($1,000 viáticos fijos)</option>
+        <option value="otro">Otro Estado (viáticos calculados por distancia)</option>
+    </select>
+    <small class="help-text">La zona determina cómo se calculan los viáticos de instalación</small>
+  </div>
+
+  <!-- ✅ PASO 2B: Campos para otros estados (solo cuando zona = otro) -->
   <div class="form-group" id="campoKilometros" style="display: none;">
+    <h4>📏 Configuración de Viáticos - Otro Estado</h4>
     <label for="kilometros">Kilómetros de distancia:</label>
     <input type="number" id="kilometros" min="0" step="1" placeholder="Ej: 150">
     <small class="help-text">Se cobran $20 por kilómetro distribuidos entre productos</small>
@@ -52,7 +83,6 @@
     <input type="number" id="montoExtra" min="0" step="0.01" placeholder="Ej: 500">
     <small class="help-text">Monto adicional a distribuir entre productos (opcional)</small>
     
-    <!-- ✅ NUEVO: Opción de cálculo de viáticos -->
     <div class="form-group" style="margin-top: 15px;">
       <label>Mostrar viáticos:</label>
       <div style="display: flex; gap: 15px; margin-top: 5px;">
@@ -69,7 +99,20 @@
     </div>
   </div>
 
-  <div class="form-group" id="productoForm">
+  <!-- ✅ PASO 3: Resto del formulario -->
+  <div id="restoFormulario" style="display:none;">
+    <h3>📋 Paso 3: Configuración Adicional</h3>
+    
+    <div class="form-group">
+      <label>
+        <input type="checkbox" id="requiereFactura"> Requiere Factura (IVA)
+      </label>
+      <!-- Checkbox oculto que se maneja automáticamente -->
+      <input type="checkbox" id="requiereInstalacion" style="display:none;">
+    </div>
+
+    <!-- ... resto del formulario de productos continúa igual ... -->
+    <div class="form-group" id="productoForm">
     <h3>Agregar Producto</h3>
     
     <!----------------- NUEVA ESTRUCTURA: Primero categoría, después subcategoría ----------------->
@@ -242,15 +285,6 @@
     <div id="listaProductos" class="productos-lista"></div>
   </div>
 
-  <div class="form-group opciones">
-    <label>
-      <input type="checkbox" id="requiereFactura"> Requiere Factura (IVA)
-    </label>
-    <label>
-      <input type="checkbox" id="requiereInstalacion"> Requiere Instalación
-    </label>
-  </div>
-
   <div class="form-actions">
     <button type="button" onclick="generarCotizacionDesdeForm()" class="btn-primary">Generar Cotización</button>
     <button type="button" onclick="cerrarFormulario()" class="btn-secondary">Cancelar</button>
@@ -265,6 +299,82 @@
         <input type="text" id="editarCliente" required>
     </div>
 
+    <!-- ✅ NUEVO: Tipo de servicio en edición -->
+    <div class="form-group paso-instalacion">
+        <h3>🔧 Tipo de Servicio</h3>
+        <label class="pregunta-principal">¿Este proyecto requiere instalación?</label>
+        
+        <div class="opciones-instalacion">
+            <label class="opcion-radio">
+                <input type="radio" name="tipoServicioEditar" value="conInstalacion" id="editarRadioConInstalacion">
+                <span class="radio-custom"></span>
+                <div class="opcion-texto">
+                    <strong>✅ Sí, incluye instalación</strong>
+                    <small>Requiere selección de zona para calcular viáticos</small>
+                </div>
+            </label>
+            
+            <label class="opcion-radio">
+                <input type="radio" name="tipoServicioEditar" value="soloFabricacion" id="editarRadioSoloFabricacion">
+                <span class="radio-custom"></span>
+                <div class="opcion-texto">
+                    <strong>📦 Solo fabricación</strong>
+                    <small>Sin viáticos - No requiere zona</small>
+                </div>
+            </label>
+        </div>
+    </div>
+
+    <!-- ✅ NUEVO: Zona de instalación en edición (solo visible si hay instalación) -->
+    <div id="editarConfiguracionZona" class="form-group" style="display:none;">
+        <h3>🌍 Zona de Instalación</h3>
+        <p>Seleccione la zona donde se realizará la instalación:</p>
+        
+        <label for="editarZonaServicio">Zona de instalación:</label>
+        <select id="editarZonaServicio">
+            <option value="">Seleccionar zona...</option>
+            <option value="cdmx">CDMX / Zona Metropolitana ($1,000 viáticos fijos)</option>
+            <option value="otro">Otro Estado (viáticos calculados por distancia)</option>
+        </select>
+        <small class="help-text">La zona determina cómo se calculan los viáticos de instalación</small>
+    </div>
+
+    <!-- ✅ NUEVO: Campos para otros estados en edición -->
+    <div class="form-group" id="editarCampoKilometros" style="display: none;">
+        <h4>📏 Configuración de Viáticos - Otro Estado</h4>
+        <label for="editarKilometros">Kilómetros de distancia:</label>
+        <input type="number" id="editarKilometros" min="0" step="1" placeholder="Ej: 150">
+        <small class="help-text">Se cobran $20 por kilómetro distribuidos entre productos</small>
+        
+        <label for="editarMontoExtra">Monto extra (opcional):</label>
+        <input type="number" id="editarMontoExtra" min="0" step="0.01" placeholder="Ej: 500">
+        <small class="help-text">Monto adicional a distribuir entre productos (opcional)</small>
+        
+        <div class="form-group" style="margin-top: 15px;">
+            <label>Mostrar viáticos:</label>
+            <div style="display: flex; gap: 15px; margin-top: 5px;">
+                <label style="display: flex; align-items: center; gap: 5px;">
+                    <input type="radio" name="editarTipoViatico" value="implicito" checked>
+                    <span>Incluidos en productos</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 5px;">
+                    <input type="radio" name="editarTipoViatico" value="explicito">
+                    <span>Como producto separado</span>
+                </label>
+            </div>
+            <small class="help-text">Implícito: se suman a cada producto | Explícito: aparece como línea separada</small>
+        </div>
+    </div>
+
+    <!-- ✅ NUEVO: Requiere factura en edición -->
+    <div class="form-group">
+        <label>
+            <input type="checkbox" id="editarRequiereFactura"> Requiere Factura (IVA)
+        </label>
+        <!-- Checkbox oculto que se maneja automáticamente -->
+        <input type="checkbox" id="editarRequiereInstalacion" style="display:none;">
+    </div>
+
     <div class="form-group">
         <h3>Productos en la Cotización</h3>
         <div id="editarListaProductos" class="productos-lista"></div>
@@ -275,21 +385,12 @@
         <textarea id="editarEspecificaciones" rows="4" style="width: 100%; margin-top: 10px;"></textarea>
     </div>
 
-    <div class="form-group opciones">
-        <label>
-            <input type="checkbox" id="editarFactura"> Requiere Factura (IVA)
-        </label>
-        <label>
-            <input type="checkbox" id="editarInstalacion"> Requiere Instalación
-        </label>
-    </div>
-
     <div class="form-actions">
         <button type="button" onclick="guardarEdicion()" class="btn-primary">Guardar Cambios</button>
         <button type="button" onclick="cerrarEdicion()" class="btn-secondary">Cancelar</button>
     </div>
 
-    <!-- Agregar este botón en el div editarForm, antes del div de especificaciones -->
+    <!-- El resto del formulario de agregar productos permanece igual -->
     <div class="form-group">
         <button type="button" onclick="mostrarFormularioEnEdicion()" class="btn-secondary">
             Agregar Nuevo Producto
