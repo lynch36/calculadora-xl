@@ -198,3 +198,50 @@ function agregarProductoEnEdicion() {
         console.log('Agregar producto en edición (función temporal)');
     }
 }
+
+// Funciones temporales para pruebas y fallback
+
+function mostrarFormularioTemp() {
+    const form = document.getElementById('cotizacionForm');
+    const vista = document.getElementById('vistaPrevia');
+    const editar = document.getElementById('editarForm');
+    if (form) form.style.display = 'block';
+    if (vista) vista.style.display = 'none';
+    if (editar) editar.style.display = 'none';
+}
+
+function cerrarFormularioTemp() {
+    const form = document.getElementById('cotizacionForm');
+    const vista = document.getElementById('vistaPrevia');
+    if (form) form.style.display = 'none';
+    if (vista) vista.style.display = 'block';
+}
+
+function agregarProductoTemp() {
+    console.log('Agregar producto temporal');
+    // Aquí puedes simular agregar un producto para pruebas
+}
+
+function eliminarProductoTemp(index) {
+    console.log(`Eliminar producto temporal en índice ${index}`);
+    // Aquí puedes simular eliminar un producto para pruebas
+}
+
+function mostrarVistaPreviaTemp(cotizacion) {
+    const vistaPrevia = document.getElementById('vistaPrevia');
+    if (!vistaPrevia) return;
+    vistaPrevia.textContent = JSON.stringify(cotizacion, null, 2);
+    vistaPrevia.style.display = 'block';
+}
+
+function guardarEdicionTemp() {
+    console.log('Guardar edición temporal');
+}
+
+function cerrarEdicionTemp() {
+    console.log('Cerrar edición temporal');
+}
+
+// Puedes agregar más funciones temporales para pruebas aquí
+
+console.log('✅ temp-functions.js solo contiene funciones temporales para pruebas');

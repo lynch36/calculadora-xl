@@ -1,12 +1,144 @@
 classDiagram
+    %% === ENTIDADES DE USUARIO CORREGIDAS ===
+    class Usuario {
+        +id: int
+        +nombre: string
+        +email: string
+        +passwordHash: string
+        +codigoEmpleado: string
+        +telefono: string
+        +comisionPorcentaje: decimal
+        +metaMensual: decimal
+        +fechaUltimoAcceso: Date
+        +fechaCreacion: Date
+        +activo: boolean
+        +realizarAccion(): void
+        +obtenerRoles(): Array~Rol~
+        +tienePermiso(accion): boolean
+        +esVendedor(): boolean
+        +calcularComision(venta): decimal
+        +obtenerVentasDelMes(): Array~Venta~
+        +calcularCumplimientoMeta(): decimal
+    }
+
+    class Rol {
+        +id: int
+        +nombre: string
+        +codigo: string
+        +descripcion: string
+        +permisos: Array~string~
+        +activo: boolean
+        +fechaCreacion: Date
+        +validarPermiso(accion): boolean
+        +obtenerPermisos(): Array~string~
+        +esRolVendedor(): boolean
+    }
+
+    class UsuarioRol {
+        +id: int
+        +usuarioId: int
+        +rolId: int
+        +fechaAsignacion: Date
+        +asignadoPor: int
+        +fechaExpiracion: Date
+        +activo: boolean
+        +esValida(): boolean
+        +renovar(): void
+    }
+
+    class Session {
+        +token: string
+        +usuarioId: int
+        +fechaInicio: Date
+        +fechaExpiracion: Date
+        +ipAddress: string
+        +activa: boolean
+        +esValida(): boolean
+        +renovar(): void
+        +cerrar(): void
+    }
+
+    %% === ENTIDADES DE VENTAS (sin clase Vendedor) ===
+    class Venta {
+        +id: int
+        +folio: string
+        +cotizacionId: int
+        +vendedorId: int
+        +clienteId: int
+        +subtotal: decimal
+        +iva: decimal
+        +descuento: decimal
+        +total: decimal
+        +estatus: string
+        +fechaVenta: Date
+        +fechaEntregaProgramada: Date
+        +fechaEntregaReal: Date
+        +observaciones: string
+        +metodoPago: Object
+        +fechaCreacion: Date
+        +fechaModificacion: Date
+        +calcularTotal(): void
+        +aplicarDescuento(porcentaje, monto): void
+        +cambiarEstatus(nuevoEstatus): void
+        +marcarEntregada(): void
+        +obtenerProductos(): Array~VentaProducto~
+        +obtenerVendedor(): Usuario
+        +generarFolio(): string
+    }
+
+    class VentaProducto {
+        +id: int
+        +ventaId: int
+        +productoId: int
+        +cantidad: int
+        +precioUnitario: decimal
+        +descuentoPorcentaje: decimal
+        +descuentoMonto: decimal
+        +subtotal: decimal
+        +observacionesProducto: string
+        +fechaAgregado: Date
+        +calcularSubtotal(): decimal
+        +aplicarDescuentoProducto(porcentaje, monto): void
+    }
+
+    class Cliente {
+        +id: int
+        +nombre: string
+        +razonSocial: string
+        +rfc: string
+        +email: string
+        +telefono: string
+        +direccion: string
+        +codigoPostal: string
+        +ciudad: string
+        +estado: string
+        +tipo: string
+        +requiereFactura: boolean
+        +fechaCreacion: Date
+        +fechaModificacion: Date
+        +obtenerCotizaciones(): Array~Cotizacion~
+        +obtenerVentas(): Array~Venta~
+        +esPersonaFisica(): boolean
+        +esPersonaMoral(): boolean
+        +actualizarDatos(datos): void
+    }
+
+    %% === SISTEMA PRINCIPAL CORREGIDO ===
     class CotizacionApp {
         -state: Object
+        -usuarioActual: Usuario
         -productManager: ProductManager
         -categoryManager: CategoryManager
         -formManager: FormManager
         -quoteGenerator: QuoteGenerator
         -exportManager: ExportManager
+        -userManager: UserManager
+        -sessionManager: SessionManager
+        -ventasManager: VentasManager
+        -clienteManager: ClienteManager
         +constructor()
+        +autenticarUsuario(credenciales): boolean
+        +verificarPermisos(accion): boolean
         +setupEventListeners()
         +handleZonaChange()
         +handleViaticosChange()
@@ -25,13 +157,72 @@ classDiagram
         +guardarEdicion()
         +cerrarEdicion()
         +exportarComoMarkdown()
+        +convertirCotizacionEnVenta(cotizacionId): Venta
+        +validarPermisoVenta(): boolean
+    }
+
+    class VentasManager {
+        -ventas: Array~Venta~
+        +constructor()
+        +crearVenta(datos): Venta
+        +convertirCotizacionEnVenta(cotizacion): Venta
+        +actualizarVenta(id, datos): boolean
+        +cambiarEstatusVenta(id, estatus): boolean
+        +obtenerVentasPorVendedor(usuarioId): Array~Venta~
+        +obtenerVentasPorFecha(fechaInicio, fechaFin): Array~Venta~
+        +calcularVentasDelMes(usuarioId): decimal
+        +generarReporteVentas(filtros): Object
+        +obtenerVendedores(): Array~Usuario~
+        +calcularComisiones(usuarioId, mes): decimal
+        +validarVendedor(usuarioId): boolean
+    }
+
+    class ClienteManager {
+        -clientes: Array~Cliente~
+        +constructor()
+        +crearCliente(datos): Cliente
+        +actualizarCliente(id, datos): boolean
+        +buscarCliente(criterio): Array~Cliente~
+        +obtenerClientePorId(id): Cliente
+        +obtenerHistorialCliente(clienteId): Object
+        +validarRFC(rfc): boolean
+        +obtenerClientesActivos(): Array~Cliente~
+    }
+
+    %% === MANAGERS ACTUALIZADOS ===
+    class UserManager {
+        -usuarios: Array~Usuario~
+        -roles: Array~Rol~
+        +autenticar(email, password): Usuario
+        +verificarPermisos(usuario, accion): boolean
+        +obtenerUsuarioActual(): Usuario
+        +asignarRol(usuarioId, rolId, asignadoPor): UsuarioRol
+        +removerRol(usuarioId, rolId): boolean
+        +obtenerRolesUsuario(usuarioId): Array~Rol~
+        +crearUsuario(datos): Usuario
+        +actualizarUsuario(id, datos): boolean
+        +desactivarUsuario(id): boolean
+        +asignarRolVendedor(usuarioId, comision, meta): boolean
+        +obtenerUsuariosVendedores(): Array~Usuario~
+        +actualizarConfiguracionVendedor(usuarioId, comision, meta): boolean
+    }
+
+    %% === RESTO DE CLASES (sin cambios significativos) ===
+    class SessionManager {
+        -sesionesActivas: Map~string, Session~
+        +crearSession(usuario): Session
+        +validarSession(token): boolean
+        +renovarSession(token): Session
+        +cerrarSession(token): void
+        +limpiarSesionesExpiradas(): void
+        +obtenerSessionActiva(token): Session
     }
 
     class ProductManager {
-        -productos: Array
+        -productos: Array~Producto~
         -contadorId: number
         +constructor()
-        +crearProducto(tipo, suffix): Object
+        +crearProducto(tipo, suffix): Producto
         +agregarProducto(producto): void
         +eliminarProducto(index): void
         +recalcularViaticos(): void
@@ -45,24 +236,155 @@ classDiagram
         +actualizarListaHTML(): void
         +actualizarTabla(): void
         +actualizarTotales(): void
-        +actualizarTotalesBasico(): void
         +calcularTotal(): number
         +calcularSubtotal(): number
         +limpiarFormulario(esEdicion): void
-        +limpiarViaticos(): void
-        +obtenerProductos(): Array
+        +obtenerProductos(): Array~Producto~
         +actualizarDescripcionProducto(index, valor): void
         +actualizarPrecioProducto(index, valor): void
-        +calcularPrecioFinal(precioBase): number
+        +prepararProductosParaVenta(productos): Array~VentaProducto~
+    }
+
+    %% === ENTIDADES DE DATOS (actualizadas) ===
+    class Cotizacion {
+        +id: int
+        +folio: string
+        +clienteId: int
+        +vendedorId: int
+        +fecha: Date
+        +requiereFactura: boolean
+        +requiereInstalacion: boolean
+        +especificaciones: string
+        +estado: string
+        +subtotal: decimal
+        +iva: decimal
+        +descuento: decimal
+        +total: decimal
+        +creadaPor: int
+        +fechaCreacion: Date
+        +fechaModificacion: Date
+        +fechaVencimiento: Date
+        +calcularTotales(): void
+        +cambiarEstado(nuevoEstado): void
+        +convertirEnVenta(): Venta
+        +estaVencida(): boolean
+        +generarFolio(): string
+        +obtenerVendedor(): Usuario
+    }
+
+    class Producto {
+        +id: int
+        +cotizacionId: int
+        +tipo: string
+        +descripcion: string
+        +descripcionPersonalizada: string
+        +precioBase: decimal
+        +precioFinal: decimal
+        +medidas: string
+        +area: decimal
+        +esViatico: boolean
+        +categoria: string
+        +orden: int
+        +creadoPor: int
+        +fechaCreacion: Date
+        +calcularPrecioFinal(): decimal
+        +convertirAVentaProducto(cantidad): VentaProducto
+    }
+
+    %% === RESTO DE ENTIDADES (sin cambios) ===
+    class Categoria {
+        +id: int
+        +nombre: string
+        +codigo: string
+        +descripcion: string
+        +activa: boolean
+        +parentId: int
+        +fechaCreacion: Date
+        +obtenerSubcategorias(): Array~Categoria~
+        +esHija(): boolean
+    }
+
+    class TipoProducto {
+        +id: int
+        +categoriaId: int
+        +nombre: string
+        +codigo: string
+        +descripcion: string
+        +configuracionCampos: Object
+        +activo: boolean
+        +fechaCreacion: Date
+        +obtenerCamposRequeridos(): Array~string~
+    }
+
+    class ZonaServicio {
+        +id: int
+        +nombre: string
+        +codigo: string
+        +viaticoFijo: decimal
+        +precioPorKm: decimal
+        +activa: boolean
+        +calcularViatico(kilometros, montoExtra): decimal
+    }
+
+    class Viatico {
+        +id: int
+        +cotizacionId: int
+        +zonaServicioId: int
+        +kilometros: decimal
+        +montoExtra: decimal
+        +tipo: string
+        +totalCalculado: decimal
+        +detalle: string
+        +fechaCreacion: Date
+        +calcular(): decimal
+    }
+
+    class ConfiguracionSistema {
+        +id: int
+        +clave: string
+        +valor: string
+        +tipoDato: string
+        +descripcion: string
+        +modificadoPor: int
+        +fechaModificacion: Date
+        +obtenerValor(): any
+        +establecerValor(nuevoValor): void
+    }
+
+    class LogAcciones {
+        +id: int
+        +usuarioId: int
+        +accion: string
+        +tablaAfectada: string
+        +registroId: int
+        +datosAnteriores: Object
+        +datosNuevos: Object
+        +ipAddress: string
+        +fechaAccion: Date
+        +registrar(): void
+    }
+
+    class Exportacion {
+        +id: int
+        +cotizacionId: int
+        +tipo: string
+        +archivoGenerado: string
+        +exportadoPor: int
+        +fechaExportacion: Date
+        +generarArchivo(): string
     }
 
     class CategoryManager {
-        -categorias: Object
+        -categorias: Array~Categoria~
+        -tiposProducto: Array~TipoProducto~
         +constructor()
         +actualizarSubcategorias(categoria, esEdicion, formManager): void
         +setupEventListeners(formManager): void
         +limpiarSelecciones(esEdicion): void
-        +obtenerCategoriaPorTipo(tipo): string
+        +obtenerCategoriaPorTipo(tipo): Categoria
+        +agregarCategoria(categoria): Categoria
+        +eliminarCategoria(categoriaId): boolean
+        +obtenerTiposProducto(categoriaId): Array~TipoProducto~
     }
 
     class FormManager {
@@ -70,6 +392,10 @@ classDiagram
         +cerrarFormulario(): void
         +ocultarTodosLosCampos(esEdicion): void
         +mostrarCamposEspecificos(tipo, esEdicion): void
+        +validarAccesoFormulario(usuario): boolean
+        +configurarCamposSegunRol(rol): void
+        +mostrarFormularioVenta(): void
+        +mostrarFormularioCliente(): void
     }
 
     class QuoteGenerator {
@@ -77,71 +403,113 @@ classDiagram
         +constructor()
         +setProductManager(productManager): void
         +generarVistaPrevia(productos, cliente, requiereFactura, requiereInstalacion, especificaciones): string
-        +generar(productos, cliente, opciones): void
+        +generar(productos, cliente, opciones): Cotizacion
         +actualizarTotales(): void
+        +calcularSubtotal(productos): decimal
+        +calcularIVA(subtotal): decimal
     }
 
     class ExportManager {
-        +exportarPDF(): void
-        +exportarMarkdown(): void
+        +exportarPDF(cotizacion): void
+        +exportarMarkdown(cotizacion): void
+        +exportarExcel(cotizacion): void
+        +registrarExportacion(cotizacion, tipo, archivo): Exportacion
+        +validarPermisosExportacion(usuario, tipo): boolean
+        +exportarReporteVentas(ventas): void
     }
 
     class Calculations {
-        +calcularIVA(subtotal): number
-        +sumaArea(base, altura, precio): number
-        +sumaAltura(altura, precio): number
-        +multiplicacionArea(base, altura, precio): number
+        +calcularIVA(subtotal): decimal
+        +sumaArea(base, altura, precio): decimal
+        +sumaAltura(altura, precio): decimal
+        +multiplicacionArea(base, altura, precio): decimal
+        +calcularViaticoPorDistancia(km, precioPorKm): decimal
+        +calcularComision(venta, porcentaje): decimal
+        +calcularDescuento(precio, porcentaje, monto): decimal
     }
 
     class Helpers {
         +mostrarMensaje(mensaje, tipo): void
         +formatearNumero(numero): string
+        +validarPermiso(usuario, accion): boolean
+        +logAccion(usuario, accion, detalles): void
+        +generarToken(): string
+        +encriptarPassword(password): string
+        +generarFolio(prefijo, serie): string
+        +validarRFC(rfc): boolean
+        +formatearFecha(fecha): string
     }
 
-    class Producto {
-        +tipo: string
-        +descripcion: string
-        +precio: number
-        +precioBase: number
-        +medidas: string
-        +esViatico: boolean
-    }
+    %% === RELACIONES CORREGIDAS ===
+    
+    %% Gestión de usuarios y roles
+    Usuario ||--o{ UsuarioRol : "tiene"
+    Rol ||--o{ UsuarioRol : "asignado_a"
+    Usuario ||--o{ Session : "inicia"
+    
+    %% Relaciones de ventas (sin clase Vendedor)
+    Usuario ||--o{ Cotizacion : "genera_como_vendedor"
+    Usuario ||--o{ Venta : "realiza_como_vendedor"
+    Cliente ||--o{ Cotizacion : "solicita"
+    Cliente ||--o{ Venta : "compra"
+    Cotizacion ||--o{ Venta : "convierte_en"
+    Venta ||--o{ VentaProducto : "contiene"
+    Producto ||--o{ VentaProducto : "vendido_como"
 
-    class Cotizacion {
-        +cliente: string
-        +fecha: string
-        +productos: Array~Producto~
-        +requiereFactura: boolean
-        +requiereInstalacion: boolean
-        +especificaciones: string
-    }
-
-    %% Relaciones de composición y agregación
+    %% Sistema principal
     CotizacionApp *-- ProductManager
     CotizacionApp *-- CategoryManager
     CotizacionApp *-- FormManager
     CotizacionApp *-- QuoteGenerator
     CotizacionApp *-- ExportManager
+    CotizacionApp *-- UserManager
+    CotizacionApp *-- SessionManager
+    CotizacionApp *-- VentasManager
+    CotizacionApp *-- ClienteManager
 
-    %% Dependencias
-    ProductManager ..> Calculations
-    ProductManager ..> Helpers
-    QuoteGenerator ..> Calculations
-    CategoryManager ..> FormManager
+    %% Managers y entidades
+    UserManager o-- Usuario
+    UserManager o-- Rol
+    UserManager o-- UsuarioRol
+    SessionManager o-- Session
+    ProductManager o-- Producto
+    CategoryManager o-- Categoria
+    CategoryManager o-- TipoProducto
+    VentasManager o-- Venta
+    VentasManager o-- VentaProducto
+    ClienteManager o-- Cliente
 
     %% Relaciones de datos
-    ProductManager o-- Producto
-    CotizacionApp o-- Cotizacion
-    Cotizacion *-- Producto
+    Usuario ||--o{ Cotizacion : "crea"
+    Usuario ||--o{ Producto : "crea"
+    Usuario ||--o{ LogAcciones : "realiza"
+    Usuario ||--o{ Exportacion : "genera"
+    Usuario ||--o{ ConfiguracionSistema : "modifica"
 
-    %% Configuración bidireccional
-    QuoteGenerator --> ProductManager : setProductManager()
-    CategoryManager --> FormManager : setupEventListeners()
+    Cotizacion ||--o{ Producto : "contiene"
+    Cotizacion ||--o{ Viatico : "incluye"
+    Cotizacion ||--o{ Exportacion : "genera"
+    Cotizacion ||--o{ LogAcciones : "registra_cambios"
 
-    %% Herencia/Interfaz (si existiera)
-    note for CotizacionApp "Controlador principal\nPatrón Facade"
-    note for ProductManager "Maneja productos y viáticos\nPatrón Repository"
-    note for CategoryManager "Maneja categorización\nPatrón Strategy"
-    note for FormManager "Maneja UI de formularios\nPatrón Observer"
-    note for QuoteGenerator "Genera cotizaciones\nPatrón Factory"
-    note for ExportManager "Exporta documentos\nPatrón Command"
+    Categoria ||--o{ TipoProducto : "agrupa"
+    Categoria ||--o{ Categoria : "parent_child"
+    TipoProducto ||--o{ Producto : "define"
+    ZonaServicio ||--o{ Viatico : "aplica_a"
+
+    %% Dependencias de servicio
+    ProductManager ..> Calculations : "usa"
+    QuoteGenerator ..> Calculations : "usa"
+    VentasManager ..> Calculations : "usa"
+    UserManager ..> Helpers : "usa"
+    SessionManager ..> Helpers : "usa"
+    ExportManager ..> Helpers : "usa"
+    VentasManager ..> Helpers : "usa"
+    ClienteManager ..> Helpers : "usa"
+
+    %% === NOTAS CORREGIDAS ===
+    note for Usuario "Entidad principal - vendedor por rol, no tabla separada"
+    note for Rol "Incluye rol 'Vendedor' con permisos de venta"
+    note for Venta "Proceso de venta - vendedorId apunta a Usuario"
+    note for VentasManager "Gestión de ventas - valida rol vendedor"
+    note for UserManager "Maneja asignación de rol vendedor y configuración"
+    note for CotizacionApp "Sistema completo: usuario con rol vendedor puede cotizar y vender"

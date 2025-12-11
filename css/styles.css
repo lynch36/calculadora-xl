@@ -416,7 +416,7 @@ button {
 
 /* ✅ CSS LIMPIO Y DEFINITIVO PARA FORMULARIO DE EDICIÓN */
 #editarForm {
-    display: none;
+    display: block;
 }
 
 /* Formulario dinámico siempre visible */
@@ -449,4 +449,25 @@ body.editing-mode #mensajes {
     h1 {
         font-size: 2rem;
     }
+}
+/* Mejorar visibilidad del formulario de edición */
+#formularioNuevoProducto {
+    min-height: auto !important;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+#formularioNuevoProducto h3 {
+    margin-top: 0;
+    color: #333;
+}
+
+#formularioNuevoProducto .form-control {
+    margin-bottom: 10px;
+}
+
+#formularioNuevoProducto button {
+    margin-top: 10px;
 }

@@ -380,6 +380,9 @@ class CotizacionApp {
             requiereInstalacion: requiereInstalacion
         };
 
+        // Guardar cotización temporal en LocalStorage
+        localStorage.setItem('cotizacionTemporal', JSON.stringify(this.state.cotizacion));
+
         // Generar y mostrar vista previa
         this.actualizarVistaPrevia();
         
@@ -550,7 +553,7 @@ class CotizacionApp {
                 </div>
 
                 <!-- Configuración Zona (solo si requiere instalación) -->
-                <div id="editarConfiguracionZonaDinamica" style="
+                <div id="editarConfiguracionZonaDinamico" style="
                     margin-bottom: 25px; 
                     padding: 20px; 
                     background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); 
@@ -815,12 +818,9 @@ class CotizacionApp {
             `;
 
             // Crear descripción del producto
-            let descripcion = `${producto.tipo}`;
-            if (producto.medidas && producto.medidas.base && producto.medidas.altura) {
-                descripcion += ` - ${producto.medidas.base}x${producto.medidas.altura} cm`;
-            }
-            if (producto.area) {
-                descripcion += ` - ${producto.area.toFixed(2)} m²`;
+            let descripcion = producto.descripcionCompleta || producto.descripcion || '';
+            if (producto.medidas) {
+                descripcion += ` - ${producto.medidas}`;
             }
 
             productoDiv.innerHTML = `
@@ -1303,36 +1303,23 @@ class CotizacionApp {
                 box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             `;
 
-            let descripcion = `${producto.tipo}`;
-            if (producto.medidas && producto.medidas.base && producto.medidas.altura) {
-                descripcion += ` - ${producto.medidas.base}x${producto.medidas.altura} cm`;
-            }
-            if (producto.area) {
-                descripcion += ` - ${producto.area.toFixed(2)} m²`;
+            let descripcion = producto.descripcionCompleta || producto.descripcion || '';
+            if (producto.medidas) {
+                descripcion += ` - ${producto.medidas}`;
             }
 
             productoDiv.innerHTML = `
                 <div>
                     <strong style="font-size: 16px; color: #333;">${descripcion}</strong>
-                    <br><span style="color: #28a745; font-weight: bold; font-size: 15px;">Precio: $${producto.precio.toFixed(2)}</span>
+                    <br><span style="color: #28a745; font-weight: bold; font-size: 15px;">Precio: $${Helpers.formatearNumero(producto.precio)}</span>
                     ${producto.descripcionPersonalizada ? `<br><small style="color: #666; font-style: italic;">${producto.descripcionPersonalizada}</small>` : ''}
                 </div>
-                <button onclick="app.eliminarProductoEdicionDinamica(${index})" 
-                        style="
-                            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-                            color: white; 
-                            border: none; 
-                            padding: 8px 15px; 
-                            border-radius: 5px; 
-                            cursor: pointer; 
-                            font-weight: bold;
-                            transition: all 0.3s ease;
-                            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
-                        "
-                        onmouseover="this.style.transform='scale(1.05)'"
-                        onmouseout="this.style.transform='scale(1)'">
-                    🗑️ Eliminar
-                </button>
+                <div>
+                    <button onclick="app.eliminarProductoEdicionDinamica(${index})" style="background-color: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
+                        Eliminar
+                    </button>
+                    <button onclick="window.editarProductoDinamico(${index})" style="margin-left:8px;background:#ffc107;color:#333;border:none;padding:8px 15px;border-radius:5px;cursor:pointer;font-weight:bold;">✏️ Editar</button>
+                </div>
             `;
 
             lista.appendChild(productoDiv);
@@ -1348,7 +1335,7 @@ class CotizacionApp {
         if (radioConInstalacion) {
             radioConInstalacion.addEventListener('change', () => {
                 if (radioConInstalacion.checked) {
-                    document.getElementById('editarConfiguracionZonaDinamica').style.display = 'block';
+                    document.getElementById('editarConfiguracionZonaDinamico').style.display = 'block';
                     console.log('✅ Instalación activada');
                 }
             });
@@ -1357,7 +1344,7 @@ class CotizacionApp {
         if (radioSoloFabricacion) {
             radioSoloFabricacion.addEventListener('change', () => {
                 if (radioSoloFabricacion.checked) {
-                    document.getElementById('editarConfiguracionZonaDinamica').style.display = 'none';
+                    document.getElementById('editarConfiguracionZonaDinamico').style.display = 'none';
                     console.log('📦 Solo fabricación activado');
                 }
             });
@@ -1389,7 +1376,7 @@ class CotizacionApp {
 
         // Obtener datos del formulario dinámico
         const requiereInstalacion = document.getElementById('editarRadioConInstalacionDinamico').checked;
-        const requiereFactura = document.getElementById('editarRequiereFacturaDinamico').checked;
+        const requiereFactura = document.getElementById('editarRequiereFacturaDinamico')?.checked || false;
         const especificaciones = document.getElementById('editarEspecificacionesDinamico').value;
         
         let zonaServicio = '';
@@ -1468,41 +1455,219 @@ class CotizacionApp {
             console.log(`✅ Producto ${index + 1} eliminado`);
         }
     }
+
+    // NUEVO: Función para editar producto dinámico
+    editarProductoDinamico(index) {
+        const producto = window.app.productManager.productos[index];
+        if (!producto) return;
+
+        // Mostrar el formulario de edición
+        document.getElementById('editarForm').style.display = 'block';
+        document.getElementById('formularioNuevoProducto').style.display = 'block';
+
+        // Rellenar los campos del formulario de edición
+        const categoria = document.getElementById('categoriaProductoEdicion');
+        if (categoria) categoria.value = producto.categoria || '';
+
+        const tipo = document.getElementById('tipoProductoEdicion');
+        if (tipo) tipo.value = producto.tipo || '';
+
+        const base = document.getElementById('baseEdicion');
+        if (base) base.value = producto.base || '';
+
+        const altura = document.getElementById('alturaEdicion');
+        if (altura) altura.value = producto.altura || '';
+
+        const tipoNeon = document.getElementById('tipoNeonEdit');
+        if (tipoNeon) tipoNeon.value = producto.tipoNeon || '';
+
+        const calidadLona = document.getElementById('calidadLonaEditar');
+        if (calidadLona) calidadLona.value = producto.calidadLona || '';
+
+        const calidadVinil = document.getElementById('calidadVinilEdit');
+        if (calidadVinil) calidadVinil.value = producto.calidadVinil || '';
+
+        const altura3D = document.getElementById('altura3DEdicion');
+        if (altura3D) altura3D.value = producto.altura3D || '';
+
+        const material3D = document.getElementById('material3DEdicion');
+        if (material3D) material3D.value = producto.material3D || '';
+
+        const base3D = document.getElementById('base3DEdicion');
+        if (base3D) base3D.value = producto.base3D || '';
+
+        const alturaInfo3D = document.getElementById('alturaInfo3DEdicion');
+        if (alturaInfo3D) alturaInfo3D.value = producto.alturaInfo3D || '';
+
+        const alturaPlanas = document.getElementById('alturaPlanasEdicion');
+        if (alturaPlanas) alturaPlanas.value = producto.alturaPlanas || '';
+
+        const materialPlanas = document.getElementById('materialPlanasEdicion');
+        if (materialPlanas) materialPlanas.value = producto.materialPlanas || '';
+
+        const basePlanas = document.getElementById('basePlanasEdicion');
+        if (basePlanas) basePlanas.value = producto.basePlanas || '';
+
+        const alturaInfoPlanas = document.getElementById('alturaInfoPlanasEdicion');
+        if (alturaInfoPlanas) alturaInfoPlanas.value = producto.alturaInfoPlanas || '';
+
+        const calidadBanner = document.getElementById('calidadBannerEdicion');
+        if (calidadBanner) calidadBanner.value = producto.calidadBanner || '';
+
+        const areaCircular = document.getElementById('areaCircularEdicion');
+        if (areaCircular) areaCircular.value = producto.areaCircular || '';
+
+        const descripcionOtro = document.getElementById('descripcionOtroEdit');
+        if (descripcionOtro) descripcionOtro.value = producto.descripcionOtro || '';
+
+        const costoOtro = document.getElementById('costoOtroEdit');
+        if (costoOtro) costoOtro.value = producto.costo || '';
+
+        const baseDobleVista = document.getElementById('baseDobleVistaEditar');
+        if (baseDobleVista) baseDobleVista.value = producto.baseDobleVista || '';
+
+        const alturaDobleVista = document.getElementById('alturaDobleVistaEditar');
+        if (alturaDobleVista) alturaDobleVista.value = producto.alturaDobleVista || '';
+
+        const descripcionPersonalizada = document.getElementById('descripcionPersonalizadaEdicion');
+        if (descripcionPersonalizada) descripcionPersonalizada.value = producto.descripcionPersonalizada || '';
+    }
 }
 
 // Exponer la clase CotizacionApp globalmente
 window.CotizacionApp = CotizacionApp;
 
-// Inicializar la aplicación cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
     let app = new CotizacionApp();
-    window.app = app; // Exponer para debugging
+    window.app = app;
 
     // Forzar recálculo de viáticos al inicio (si hay productos)
     setTimeout(() => {
         if (app.productManager.productos.length > 0) {
-            console.log('🔄 Forzando recálculo de viáticos al iniciar la app...');
             app.productManager.productos.forEach((producto, index) => {
-                // 1. Agregar precioBase a productos existentes
-                console.log(`Producto ${index + 1}:`, {
-                    precio: producto.precio,
-                    medidas: producto.medidas
-                });
-                producto.precioBase = producto.precio; // El precio actual ES el precio base (sin viáticos aplicados aún)
-                if (!producto.precioBase) {
-                    console.warn(`⚠️ Producto ${index + 1} no tiene precioBase definido`);
-                }
+                producto.precioBase = producto.precio;
             });
-
-            // 2. Ahora recalcular viáticos
             app.productManager.recalcularViaticos();
-
-            // 3. Verificar resultado
-            app.productManager.productos.forEach((producto, index) => {
-                console.log(`✅ Producto ${index + 1}: precioBase = $${producto.precioBase}`);
-            });
         }
     }, 1000);
 
-    console.log('App inicializada:', app);
+    // Función para crear productos dinámicamente
+    window.agregarProductoDinamico = function() {
+        const categoria = document.getElementById('categoriaProductoDinamico').value;
+        const tipo = document.getElementById('tipoProductoDinamico').value || (categoria === 'neon' ? '3' : '');
+        const descripcionPersonalizada = document.getElementById('descripcionPersonalizadaDinamico').value;
+
+        if (!categoria) {
+            alert('Por favor seleccione una categoría');
+            return;
+        }
+        if (!tipo && categoria !== 'neon') {
+            alert('Por favor seleccione un tipo de producto');
+            return;
+        }
+
+        const campos = {};
+        const camposIds = [
+            'baseDinamico', 'alturaDinamico', 'tipoNeonDinamico', 'calidadLonaDinamico', 'calidadVinilDinamico',
+            'altura3DDinamico', 'material3DDinamico', 'base3DDinamico', 'alturaInfo3DDinamico',
+            'alturaplanasDinamico', 'materialPlanasDinamico', 'basePlanasDinamico', 'alturaInfoPlanasDinamico',
+            'calidadBannerDinamico', 'areaCircularDinamico', 'descripcionOtroDinamico', 'costoOtroDinamico',
+            'baseDobleVistaDinamico', 'alturaDobleVistaDinamico'
+        ];
+        camposIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el && el.value) campos[id.replace('Dinamico', '')] = el.value;
+        });
+
+        let nombreTipo = '';
+        if (window.categoriasDinamicas && window.categoriasDinamicas[categoria]) {
+            const tipoObj = window.categoriasDinamicas[categoria].find(t => t.value === tipo);
+            if (tipoObj) nombreTipo = tipoObj.text;
+        }
+
+        if (window.app && window.app.productManager) {
+            const producto = window.app.productManager.crearProducto(tipo, nombreTipo, campos, descripcionPersonalizada);
+            if (producto) {
+                window.app.productManager.agregarProducto(producto);
+                if (typeof window.app.cargarProductosEnListaDinamica === 'function') {
+                    window.app.cargarProductosEnListaDinamica();
+                }
+                alert('✅ Producto agregado exitosamente');
+                window.toggleFormularioNuevoProducto();
+            } else {
+                alert('No se pudo crear el producto');
+            }
+        } else {
+            alert('Error: ProductManager no disponible');
+        }
+
+        if (window.productoEditandoIndex !== null) {
+            const producto = window.app.productManager.productos[window.productoEditandoIndex];
+            if (producto) {
+                const nuevoCosto = document.getElementById('costoOtroEdit')?.value;
+                if (nuevoCosto !== undefined && producto) {
+                    producto.costo = parseFloat(nuevoCosto) || 0;
+                }
+                window.app.cargarProductosEnListaDinamica();
+                window.toggleFormularioNuevoProducto();
+                window.productoEditandoIndex = null;
+                document.querySelector('#formularioNuevoProductoDinamico button[type="button"]').textContent = '✅ Agregar Producto';
+                return;
+            }
+        }
+    };
+
+    window.editarProductoDinamico = function(index) {
+        console.log('+++++++ Editando producto en índice:', index);
+        // 1. Verifica el producto
+    const producto = window.app.productManager.productos[index];
+    console.log('Producto seleccionado:', producto);
+    if (!producto) {
+        console.error('No se encontró el producto en el índice:', index);
+        return;
+    }
+
+         // 2. Mostrar el formulario de edición
+    const editarForm = document.getElementById('editarForm');
+    const formularioNuevoProducto = document.getElementById('formularioNuevoProducto');
+    console.log('editarForm:', editarForm);
+    console.log('formularioNuevoProducto:', formularioNuevoProducto);
+
+    if (editarForm) editarForm.style.display = 'block';
+    if (formularioNuevoProducto) formularioNuevoProducto.style.display = 'block';
+
+
+        // 3. Debug de cada campo
+    const campos = [
+        ['categoriaProductoEdicion', 'categoria'],
+        ['tipoProductoEdicion', 'tipo'],
+        ['baseEdicion', 'base'],
+        ['alturaEdicion', 'altura'],
+        ['tipoNeonEdit', 'tipoNeon'],
+        ['calidadLonaEditar', 'calidadLona'],
+        ['calidadVinilEdit', 'calidadVinil'],
+        ['altura3DEdicion', 'altura3D'],
+        ['material3DEdicion', 'material3D'],
+        ['base3DEdicion', 'base3D'],
+        ['alturaInfo3DEdicion', 'alturaInfo3D'],
+        ['alturaPlanasEdicion', 'alturaPlanas'],
+        ['materialPlanasEdicion', 'materialPlanas'],
+        ['basePlanasEdicion', 'basePlanas'],
+        ['alturaInfoPlanasEdicion', 'alturaInfoPlanas'],
+        ['calidadBannerEdicion', 'calidadBanner'],
+        ['areaCircularEdicion', 'areaCircular'],
+        ['descripcionOtroEdit', 'descripcionOtro'],
+        ['costoOtroEdit', 'costo'],
+        ['baseDobleVistaEditar', 'baseDobleVista'],
+        ['alturaDobleVistaEditar', 'alturaDobleVista'],
+        ['descripcionPersonalizadaEdicion', 'descripcionPersonalizada']
+    ];
+
+    campos.forEach(([id, prop]) => {
+        const campo = document.getElementById(id);
+        const valor = producto[prop] || '';
+        console.log(`Campo: ${id}, Elemento:`, campo, `Valor producto.${prop}:`, valor);
+        if (campo) campo.value = valor;
+    });
+    }
 });

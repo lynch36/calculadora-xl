@@ -1,0 +1,89 @@
+services:
+  # Base de datos PostgreSQL
+  calculadora-db:
+    image: postgres:15-alpine
+    container_name: calculadora_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: calculadora_xl
+      POSTGRES_USER: calculadora_user
+      POSTGRES_PASSWORD: calculadora_pass_456
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=es_ES.UTF-8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - calculadora_db_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+      - ./database/backups:/backups
+    networks:
+      - calculadora_network
+
+  # pgAdmin para administración web
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: calculadora_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@calculadora.com
+      PGADMIN_DEFAULT_PASSWORD: admin_password_123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "8080:80"
+    volumes:
+      - calculadora_pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - calculadora-db
+    networks:
+      - calculadora_network
+
+  # Redis para caché y sesiones
+  calculadora-redis:
+    image: redis:7-alpine
+    container_name: calculadora_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass redis_password_789
+    ports:
+      - "6379:6379"
+    volumes:
+      - calculadora_redis_data:/data
+    networks:
+      - calculadora_network
+
+  # Aplicación Node.js
+  calculadora-app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: calculadora_node
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      DB_HOST: calculadora-db
+      DB_PORT: 5432
+      DB_NAME: calculadora_xl
+      DB_USER: calculadora_user
+      DB_PASSWORD: calculadora_pass_456
+      REDIS_HOST: calculadora-redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: redis_password_789
+      JWT_SECRET: super_secret_jwt_key_xyz
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - calculadora-db
+      - calculadora-redis
+    networks:
+      - calculadora_network
+
+volumes:
+  calculadora_db_data:
+  calculadora_redis_data:
+  calculadora_pgadmin_data:
+
+networks:
+  calculadora_network:
+    driver: bridge
