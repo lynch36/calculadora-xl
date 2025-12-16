@@ -1,0 +1,116 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model cliente {
+  id         Int          @id @default(autoincrement())
+  nombre     String       @db.VarChar(100)
+  email      String?      @db.VarChar(100)
+  telefono   String?      @db.VarChar(20)
+  direccion  String?
+  cotizacion cotizacion[]
+
+  @@index([email], map: "idx_cliente_email")
+}
+
+model cotizacion {
+  id                  Int                   @id @default(autoincrement())
+  cliente_id          Int?
+  usuario_id          Int?
+  fecha               DateTime?             @default(now()) @db.Timestamp(6)
+  total               Decimal               @db.Decimal(12, 2)
+  estado              String?               @default("pendiente") @db.VarChar(30)
+  cliente             cliente?              @relation(fields: [cliente_id], references: [id], onUpdate: NoAction)
+  usuario             usuario?              @relation(fields: [usuario_id], references: [id], onUpdate: NoAction)
+  cotizacion_producto cotizacion_producto[]
+  venta               venta[]
+
+  @@index([cliente_id], map: "idx_cotizacion_cliente")
+}
+
+model cotizacion_producto {
+  cotizacion_id   Int
+  producto_id     Int
+  cantidad        Int        @default(1)
+  precio_unitario Decimal    @db.Decimal(12, 2)
+  cotizacion      cotizacion @relation(fields: [cotizacion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  producto        producto   @relation(fields: [producto_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([cotizacion_id, producto_id])
+}
+
+model producto {
+  id                  Int                   @id @default(autoincrement())
+  nombre              String                @db.VarChar(100)
+  descripcion         String?
+  precio              Decimal               @db.Decimal(12, 2)
+  categoria           String?               @db.VarChar(50)
+  activo              Boolean?              @default(true)
+  cotizacion_producto cotizacion_producto[]
+  venta_producto      venta_producto[]
+
+  @@index([nombre], map: "idx_producto_nombre")
+}
+
+model rol {
+  id          Int           @id @default(autoincrement())
+  nombre      String        @unique @db.VarChar(50)
+  usuario_rol usuario_rol[]
+}
+
+model sesion {
+  id         Int       @id @default(autoincrement())
+  usuario_id Int?
+  token      String    @db.VarChar(255)
+  creado_en  DateTime? @default(now()) @db.Timestamp(6)
+  expira_en  DateTime? @db.Timestamp(6)
+  usuario    usuario?  @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model usuario {
+  id          Int           @id @default(autoincrement())
+  nombre      String        @db.VarChar(100)
+  email       String        @unique @db.VarChar(100)
+  password    String        @db.VarChar(255)
+  activo      Boolean?      @default(true)
+  creado_en   DateTime?     @default(now()) @db.Timestamp(6)
+  cotizacion  cotizacion[]
+  sesion      sesion[]
+  usuario_rol usuario_rol[]
+
+  @@index([email], map: "idx_usuario_email")
+}
+
+model usuario_rol {
+  usuario_id Int
+  rol_id     Int
+  rol        rol     @relation(fields: [rol_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  usuario    usuario @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([usuario_id, rol_id])
+}
+
+model venta {
+  id             Int              @id @default(autoincrement())
+  cotizacion_id  Int?
+  fecha          DateTime?        @default(now()) @db.Timestamp(6)
+  total          Decimal          @db.Decimal(12, 2)
+  cotizacion     cotizacion?      @relation(fields: [cotizacion_id], references: [id], onUpdate: NoAction)
+  venta_producto venta_producto[]
+}
+
+model venta_producto {
+  venta_id        Int
+  producto_id     Int
+  cantidad        Int      @default(1)
+  precio_unitario Decimal  @db.Decimal(12, 2)
+  producto        producto @relation(fields: [producto_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  venta           venta    @relation(fields: [venta_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([venta_id, producto_id])
+}

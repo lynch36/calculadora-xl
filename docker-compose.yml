@@ -58,24 +58,11 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: development
-      DB_HOST: calculadora-db
-      DB_PORT: 5432
-      DB_NAME: calculadora_xl
-      DB_USER: calculadora_user
-      DB_PASSWORD: calculadora_pass_456
-      REDIS_HOST: calculadora-redis
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: redis_password_789
-      JWT_SECRET: super_secret_jwt_key_xyz
-      PORT: 3000
+      DATABASE_URL: "postgresql://calculadora_user:calculadora_pass_456@calculadora-db:5432/calculadora_xl"
     ports:
       - "3000:3000"
-    volumes:
-      - .:/app
-      - /app/node_modules
     depends_on:
       - calculadora-db
-      - calculadora-redis
     networks:
       - calculadora_network
 

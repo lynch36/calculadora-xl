@@ -9,7 +9,8 @@ LABEL version="1.0.0"
 RUN apk add --no-cache \
     postgresql-client \
     curl \
-    bash
+    bash \
+    openssl
 
 # Crear grupo y usuario no-root para seguridad
 RUN addgroup -g 1001 -S nodejs && \
@@ -22,11 +23,13 @@ WORKDIR /app
 COPY package*.json ./
 
 # Instalar dependencias de Node.js
-RUN npm ci --only=production && \
-    npm cache clean --force
+RUN npm ci && npm cache clean --force
 
 # Copiar el código fuente
 COPY --chown=nodejs:nodejs . .
+
+# Generar cliente de Prisma
+RUN npx prisma generate
 
 # Cambiar a usuario no-root
 USER nodejs

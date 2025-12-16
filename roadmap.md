@@ -183,7 +183,7 @@ calculadora-xl/
 │   ├── cotizaciones.js
 │   └── productos.js
 ├── docker-compose.yml
-└── js/app.js (integrado con BD)
+└── js/index.js (integrado con BD)
 ```
 
 ---
